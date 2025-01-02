@@ -1,6 +1,6 @@
 import { OmitType, PickType } from '@nestjs/swagger';
-import { Coupon } from '../domain/coupon';
-import { UserCoupon } from '../domain/userCoupon';
+import { Coupon } from '../../domain/coupon';
+import { UserCoupon } from '../../domain/userCoupon';
 
 export class AvailableCouponResponseDto extends PickType(Coupon, [
     'id',

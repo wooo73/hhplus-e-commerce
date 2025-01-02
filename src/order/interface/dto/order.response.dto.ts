@@ -1,6 +1,6 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
-import { Order } from '../domain/order';
-import { OrderItem } from '../domain/order-item';
+import { Order } from '../../domain/order';
+import { OrderItem } from '../../domain/order-item';
 
 export class OrderItemResponseDto extends OmitType(OrderItem, [
     'createdAt',

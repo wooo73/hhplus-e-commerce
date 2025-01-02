@@ -1,7 +1,13 @@
 import { Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { CouponService } from '../application/coupon.service';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AvailableCouponResponseDto, UserCouponResponseDto } from '../dto/coupon.response.dto';
+import {
+    ApiBadRequestResponse,
+    ApiConflictResponse,
+    ApiOkResponse,
+    ApiOperation,
+    ApiTags,
+} from '@nestjs/swagger';
+import { AvailableCouponResponseDto, UserCouponResponseDto } from './dto/coupon.response.dto';
 
 @Controller('coupon')
 @ApiTags('Coupon')
@@ -37,6 +43,8 @@ export class CouponController {
         description: '발급된 쿠폰',
         type: UserCouponResponseDto,
     })
+    @ApiBadRequestResponse({ description: '비정상 쿠폰입니다.' })
+    @ApiConflictResponse({ description: '발급 수량이 초과되었습니다.' })
     async issueCoupon(@Param('couponId') couponId: string, @Query('userId') userId: string) {
         return {
             id: 1,
