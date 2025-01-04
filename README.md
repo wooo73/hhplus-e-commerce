@@ -3,7 +3,7 @@
 ---
 
 ### ERD
-![hhplus-e-commerce-erd](https://github.com/user-attachments/assets/15942653-528e-4555-8aa2-d5a9973c2eec)
+![e-commerce-erd](https://github.com/user-attachments/assets/651a52e2-1301-464d-91cf-e30ecfccd5db)
 
 -   user: 사용자 정보
 -   product: 상품 정보
