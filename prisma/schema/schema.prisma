@@ -1,0 +1,12 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// 마이그레이션 npx prisma migrate dev --name init
+// 마이그레이션 sql 파일만 생성: npx prisma migrate dev --create-only --preview-feature

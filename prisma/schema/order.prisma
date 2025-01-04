@@ -1,0 +1,16 @@
+model Order {
+  id             Int         @id @default(autoincrement())
+  user           User        @relation(fields: [userId], references: [id])
+  userId         Int         @map("user_id")
+  userCoupon     UserCoupon  @relation(fields: [couponId], references: [id])
+  couponId       Int         @unique @map("coupon_id")
+  totalAmount    Int         @map("total_amount")
+  discountAmount Int         @map("discount_amount")
+  finalAmount    Int         @map("final_amount")
+  status         String      @db.VarChar(10)
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt      DateTime    @updatedAt @map("updated_at") @db.Timestamp(0)
+  orderItem      OrderItem[]
+
+  @@map("order")
+}

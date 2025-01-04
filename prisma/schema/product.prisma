@@ -1,0 +1,11 @@
+model Product {
+  id              Int              @id @default(autoincrement())
+  name            String           @db.VarChar(50)
+  price           Int              @db.Int
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamp(0)
+  orderItem       OrderItem?
+  ProductQuantity ProductQuantity?
+
+  @@map("product")
+}
