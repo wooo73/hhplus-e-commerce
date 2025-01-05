@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class User {
     @ApiProperty({ example: '1', description: '사용자 ID' })
-    id: string;
+    id: number;
 
     @ApiProperty({ example: 15_000, description: '사용자 잔액' })
     balance: number;

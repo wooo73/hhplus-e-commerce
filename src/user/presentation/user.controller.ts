@@ -17,7 +17,7 @@ export class UserController {
 
     @Post(':userId/balance/charge')
     @ChargeUserBalanceSwagger()
-    async chargePoint(
+    async chargeBalance(
         @Param('userId') userId: number,
         @Body() userChargePointRequestDto: UserChargePointRequestDto,
     ) {
