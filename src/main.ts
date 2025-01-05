@@ -1,9 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { PrismaService } from './database/prisma/prisma.service';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
+
+    const prismaService = app.get(PrismaService);
+    await prismaService.enableShutdownHooks();
+
     const options = new DocumentBuilder()
         .setTitle('E-commerce API')
         .setDescription('API for e-commerce application')
