@@ -1,0 +1,9 @@
+model ProductQuantity {
+  id                Int     @id @default(autoincrement())
+  product           Product @relation(fields: [productId], references: [id])
+  productId         Int     @unique @map("product_id")
+  quantity          Int
+  remainingQuantity Int     @map("remaining_quantity")
+
+  @@map("product_quantity")
+}
