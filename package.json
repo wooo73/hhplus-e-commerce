@@ -23,7 +23,7 @@
         "docker:up": "docker-compose -f docker-compose.yaml up -d",
         "docker:down": "docker-compose -f docker-compose.yaml down -v",
         "migrate:test": "dotenv -e .env.test -- npx prisma migrate deploy",
-        "seed:test": "dotenv -e .env.test -- npx prisma db seed"
+        "seed:test": "npx prisma db seed"
     },
     "dependencies": {
         "@nestjs/common": "^10.0.0",
