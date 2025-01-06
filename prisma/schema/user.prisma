@@ -4,7 +4,7 @@ model User {
   createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt  DateTime    @updatedAt @map("updated_at") @db.Timestamp(0)
   order      Order[]
-  UserCoupon UserCoupon?
+  userCoupon UserCoupon?
 
   @@map("user")
 }
