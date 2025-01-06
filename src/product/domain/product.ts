@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ProductQuantity } from './product-quantity';
 
 export class Product {
     @ApiProperty({ example: 1, description: '상품 ID' })
@@ -18,4 +19,7 @@ export class Product {
 
     @ApiProperty({ example: '2025-01-01', description: '수정일' })
     updatedAt: Date;
+
+    @ApiProperty({ type: ProductQuantity, description: '상품 수량' })
+    ProductQuantity: ProductQuantity;
 }
