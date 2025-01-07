@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { CouponService } from '../application/coupon.service';
+import { CouponService } from '../domain/coupon.service';
 import {
     ApiBadRequestResponse,
     ApiConflictResponse,

@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { OrderService } from '../application/order.service';
+import { OrderService } from '../domain/order.service';
 import {
     ApiBadRequestResponse,
     ApiBody,

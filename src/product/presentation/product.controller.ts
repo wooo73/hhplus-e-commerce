@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { ProductService } from '../application/product.service';
+import { ProductService } from '../domain/product.service';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ProductResponseDto } from './dto/product.response.dto';
 

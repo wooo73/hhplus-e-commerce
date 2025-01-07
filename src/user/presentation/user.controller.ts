@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { UserService } from '../application/user.service';
+import { UserService } from '../domain/user.service';
 import {
     ApiBody,
     ApiNotFoundResponse,

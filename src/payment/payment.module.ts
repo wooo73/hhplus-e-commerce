@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PaymentService } from './application/payment.service';
+import { PaymentService } from './domain/payment.service';
 import { PaymentController } from './presentation/payment.controller';
 
 @Module({
