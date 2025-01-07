@@ -11,7 +11,7 @@ export class UserCoupon {
     couponId: number;
 
     @ApiProperty({ example: true, description: '사용 여부' })
-    isUsed: boolean;
+    isUsed: string;
 
     @ApiProperty({ example: '2025-01-01', description: '사용 일시' })
     usedAt: Date;

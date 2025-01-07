@@ -23,15 +23,8 @@ export class CouponController {
         description: '발급 가능한 쿠폰 목록',
         type: [AvailableCouponResponseDto],
     })
-    async getAvailableCoupons(@Query('userId') userId: string) {
-        return [
-            {
-                id: 1,
-                name: '쿠폰1',
-                discount_type: 'FIXED_AMOUNT',
-                discount_value: 2_000,
-            },
-        ];
+    async getAvailableCoupons(@Query('userId') userId: number) {
+        return await this.couponService.getAvailableCoupons(userId);
     }
 
     @Post(':couponId/issue')

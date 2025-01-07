@@ -1,15 +1,15 @@
-import { OmitType, PickType } from '@nestjs/swagger';
-import { Coupon } from '../../domain/coupon';
-import { UserCoupon } from '../../domain/userCoupon';
+import { Coupon } from '@prisma/client';
+import { CouponEntity } from '../../domain/coupon';
 
-export class AvailableCouponResponseDto extends PickType(Coupon, [
-    'id',
-    'name',
-    'discountType',
-    'discountValue',
-] as const) {}
+export class UserCouponResponseDto extends CouponEntity {}
 
-export class UserCouponResponseDto extends OmitType(UserCoupon, [
-    'createdAt',
-    'updatedAt',
-] as const) {}
+export class AvailableCouponResponseDto extends CouponEntity {
+    constructor(coupon: Coupon) {
+        super();
+        Object.assign(this, coupon);
+    }
+
+    static of(coupon: Coupon) {
+        return new AvailableCouponResponseDto(coupon);
+    }
+}
