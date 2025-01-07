@@ -1,7 +1,7 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
-import { Product } from 'src/product/domain/product';
+import { ProductEntity } from 'src/product/domain/product';
 
-class OrderProduct extends OmitType(Product, ['createdAt', 'updatedAt'] as const) {}
+class OrderProduct extends OmitType(ProductEntity, ['createdAt', 'updatedAt'] as const) {}
 
 export class OrderRequestDto {
     @ApiProperty({ example: 1, description: '사용자 ID' })
