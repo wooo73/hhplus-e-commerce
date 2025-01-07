@@ -4,8 +4,8 @@ import { IsNumber, Min } from 'class-validator';
 
 export class GetProductsQueryDTO {
     @ApiProperty({ example: 1, description: '페이지 번호' })
-    @IsNumber()
     @Transform(({ value }) => parseInt(value))
+    @IsNumber()
     @Min(1)
     page: number = 1;
 
