@@ -5,7 +5,7 @@ model Product {
   createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamp(0)
   orderItem       OrderItem?
-  ProductQuantity ProductQuantity?
+  productQuantity ProductQuantity?
 
   @@map("product")
 }

@@ -1,13 +1,13 @@
 model UserCoupon {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int      @unique @map("user_id")
-  coupon    Coupon   @relation(fields: [couponId], references: [id])
-  couponId  Int      @unique @map("coupon_id")
-  isUsed    Boolean  @default(false) @map("is_used")
-  usedAt    DateTime @map("used_at") @db.Timestamp(0)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp(0)
+  id        Int       @id @default(autoincrement())
+  user      User      @relation(fields: [userId], references: [id])
+  userId    Int       @map("user_id")
+  coupon    Coupon    @relation(fields: [couponId], references: [id])
+  couponId  Int       @map("coupon_id")
+  isUsed    Boolean   @default(false) @map("is_used")
+  usedAt    DateTime? @map("used_at") @db.Timestamp(0)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamp(0)
   Order     Order?
 
   @@map("user_coupon")

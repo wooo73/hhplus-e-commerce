@@ -1,10 +1,10 @@
 model User {
-  id         Int         @id @default(autoincrement())
-  balance    Int         @db.Int
-  createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt  DateTime    @updatedAt @map("updated_at") @db.Timestamp(0)
+  id         Int          @id @default(autoincrement())
+  balance    Int          @db.Int
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt  DateTime     @updatedAt @map("updated_at") @db.Timestamp(0)
   order      Order[]
-  UserCoupon UserCoupon?
+  UserCoupon UserCoupon[]
 
   @@map("user")
 }

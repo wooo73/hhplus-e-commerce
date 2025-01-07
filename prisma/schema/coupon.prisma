@@ -3,13 +3,13 @@ model Coupon {
   name           String          @db.VarChar(50)
   discountType   String          @map("discount_type") @db.VarChar(10)
   discountValue  Int             @map("discount_value") @db.Int
-  status         Boolean         @default(true)
+  status         String          @default("AVAILABLE")
   startAt        DateTime        @map("start_at") @db.Timestamp(0)
   endAt          DateTime        @map("end_at") @db.Timestamp(0)
   createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt      DateTime        @updatedAt @map("updated_at") @db.Timestamp(0)
   couponQuantity CouponQuantity?
-  UserCoupon     UserCoupon?
+  UserCoupon     UserCoupon[]
 
   @@map("coupon")
 }
