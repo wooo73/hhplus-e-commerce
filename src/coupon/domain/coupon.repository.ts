@@ -1,4 +1,4 @@
-import { Coupon, CouponQuantity, Prisma, PrismaClient, UserCoupon } from '@prisma/client';
+import { Coupon, CouponQuantity, Prisma, UserCoupon } from '@prisma/client';
 
 export interface CouponRepository {
     getUserOwnedCouponIds(
@@ -20,15 +20,20 @@ export interface CouponRepository {
         couponId: number,
         tx?: Prisma.TransactionClient,
     ): Promise<boolean>;
-    decrementCouponQuantity(
-        couponId: number,
-        tx?: Prisma.TransactionClient,
-    ): Promise<CouponQuantity>;
     insertUserCoupon(
         couponId: number,
         userId: number,
         tx?: Prisma.TransactionClient,
     ): Promise<UserCoupon>;
+    decrementCouponQuantity(
+        couponId: number,
+        tx?: Prisma.TransactionClient,
+    ): Promise<CouponQuantity>;
+    getUserOwnedCoupons(
+        userId: number,
+        { take, skip }: { take: number; skip: number },
+        tx?: Prisma.TransactionClient,
+    ): Promise<UserCoupon[]>;
 }
 
 export const COUPON_REPOSITORY = Symbol('COUPON_REPOSITORY');

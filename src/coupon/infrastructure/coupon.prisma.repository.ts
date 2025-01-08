@@ -98,4 +98,18 @@ export class CouponPrismaRepository implements CouponRepository {
             data: { remainingQuantity: { decrement: 1 } },
         });
     }
+
+    async getUserOwnedCoupons(
+        userId: number,
+        { take, skip }: { take: number; skip: number },
+        tx?: Prisma.TransactionClient,
+    ): Promise<UserCoupon[]> {
+        const client = this.getClient(tx);
+        console.log(take, skip);
+        return await client.userCoupon.findMany({
+            where: { userId },
+            take,
+            skip,
+        });
+    }
 }

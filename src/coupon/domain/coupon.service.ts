@@ -1,13 +1,16 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { COUPON_REPOSITORY, CouponRepository } from './coupon.repository';
-import {
-    AvailableCouponResponseDto,
-    UserCouponResponseDto,
-} from '../presentation/dto/coupon.response.dto';
+
 import {
     TRANSACTION_MANAGER,
     TransactionManager,
 } from '../../common/transaction/transaction-client';
+
+import {
+    AvailableCouponResponseDto,
+    UserCouponResponseDto,
+} from '../presentation/dto/coupon.response.dto';
+import { GetUserCouponQueryDTO } from '../presentation/dto/coupon.request.dto';
 
 @Injectable()
 export class CouponService {
@@ -59,5 +62,16 @@ export class CouponService {
 
             return UserCouponResponseDto.of(userCoupon);
         });
+    }
+
+    async getUserCoupons(
+        userId: number,
+        query: GetUserCouponQueryDTO,
+    ): Promise<UserCouponResponseDto[]> {
+        const userCoupons = await this.couponRepository.getUserOwnedCoupons(userId, {
+            take: query.take,
+            skip: query.skip,
+        });
+        return userCoupons.map((userCoupon) => UserCouponResponseDto.of(userCoupon));
     }
 }
