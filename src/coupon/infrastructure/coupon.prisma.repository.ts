@@ -1,20 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { Coupon, CouponQuantity, Prisma, PrismaClient, UserCoupon } from '@prisma/client';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { CouponRepository } from '../domain/coupon.repository';
-import { CouponStatus } from '../../common/coupon.status';
+import { CouponStatus } from '../../common/status';
+import { TransactionClient } from '../../common/transaction/transaction-client';
+import { CouponEntity } from '../domain/coupon';
+import { UserCouponEntity } from '../domain/userCoupon';
+import { CouponQuantityEntity } from '../domain/coupon-quantity';
 
 @Injectable()
 export class CouponPrismaRepository implements CouponRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    private getClient(tx?: Prisma.TransactionClient) {
-        return tx ? tx : this.prisma;
+    private getClient(tx?: TransactionClient) {
+        return tx ? tx.prisma : this.prisma;
     }
 
     async getUserOwnedCouponIds(
         userId: number,
-        tx?: Prisma.TransactionClient,
+        tx?: TransactionClient,
     ): Promise<{ couponId: number }[]> {
         const client = this.getClient(tx);
 
@@ -27,8 +30,8 @@ export class CouponPrismaRepository implements CouponRepository {
     async getAvailableCoupons(
         couponIds: number[],
         nowDate: Date,
-        tx?: Prisma.TransactionClient,
-    ): Promise<Coupon[]> {
+        tx?: TransactionClient,
+    ): Promise<CouponEntity[]> {
         const client = this.getClient(tx);
 
         return await client.coupon.findMany({
@@ -44,7 +47,7 @@ export class CouponPrismaRepository implements CouponRepository {
         couponId: number,
         userId: number,
         nowDate: Date,
-        tx?: Prisma.TransactionClient,
+        tx?: TransactionClient,
     ): Promise<boolean> {
         const client = this.getClient(tx);
 
@@ -62,7 +65,7 @@ export class CouponPrismaRepository implements CouponRepository {
 
     async couponQuantityValidCheckWithLock(
         couponId: number,
-        tx: Prisma.TransactionClient,
+        tx: TransactionClient,
     ): Promise<boolean> {
         const client = this.getClient(tx);
 
@@ -78,8 +81,8 @@ export class CouponPrismaRepository implements CouponRepository {
     async insertUserCoupon(
         couponId: number,
         userId: number,
-        tx?: Prisma.TransactionClient,
-    ): Promise<UserCoupon> {
+        tx?: TransactionClient,
+    ): Promise<UserCouponEntity> {
         const client = this.getClient(tx);
 
         return await client.userCoupon.create({
@@ -89,8 +92,8 @@ export class CouponPrismaRepository implements CouponRepository {
 
     async decrementCouponQuantity(
         couponId: number,
-        tx?: Prisma.TransactionClient,
-    ): Promise<CouponQuantity> {
+        tx?: TransactionClient,
+    ): Promise<CouponQuantityEntity> {
         const client = this.getClient(tx);
 
         return await client.couponQuantity.update({
@@ -102,8 +105,8 @@ export class CouponPrismaRepository implements CouponRepository {
     async getUserOwnedCoupons(
         userId: number,
         { take, skip }: { take: number; skip: number },
-        tx?: Prisma.TransactionClient,
-    ): Promise<UserCoupon[]> {
+        tx?: TransactionClient,
+    ): Promise<UserCouponEntity[]> {
         const client = this.getClient(tx);
         console.log(take, skip);
         return await client.userCoupon.findMany({
