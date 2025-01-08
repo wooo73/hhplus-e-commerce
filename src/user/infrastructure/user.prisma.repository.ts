@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { UserChargePointRequestDto } from '../presentation/dto/user.request.dto';
 import { UserRepository } from '../domain/user.repository';
@@ -8,16 +8,30 @@ import { UserRepository } from '../domain/user.repository';
 export class UserPrismaRepository implements UserRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async findById(userId: number): Promise<User> {
-        return await this.prisma.user.findUnique({ where: { id: userId } });
+    private getClient(tx?: Prisma.TransactionClient) {
+        return tx ? tx : this.prisma;
+    }
+
+    async findById(userId: number, tx?: Prisma.TransactionClient): Promise<User> {
+        const client = this.getClient(tx);
+
+        return await client.user.findUnique({ where: { id: userId } });
+    }
+
+    async findByIdWithLock(userId: number, tx?: Prisma.TransactionClient): Promise<User> {
+        const client = this.getClient(tx);
+
+        return await client.user.findUnique({ where: { id: userId } });
     }
 
     async updateUserBalance(
         userId: number,
         userChargePointRequestDto: UserChargePointRequestDto,
+        tx?: Prisma.TransactionClient,
     ): Promise<User> {
-        console.log(typeof userChargePointRequestDto.amount);
-        return await this.prisma.user.update({
+        const client = this.getClient(tx);
+
+        return await client.user.update({
             where: { id: userId },
             data: { balance: { increment: userChargePointRequestDto.amount } },
         });
