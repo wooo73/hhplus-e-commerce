@@ -1,24 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { UserChargePointRequestDto } from '../presentation/dto/user.request.dto';
 import { UserRepository } from '../domain/user.repository';
+import { TransactionClient } from '../../common/transaction/transaction-client';
+import { UserEntity } from '../domain/user';
 
 @Injectable()
 export class UserPrismaRepository implements UserRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    private getClient(tx?: Prisma.TransactionClient) {
-        return tx ? tx : this.prisma;
+    private getClient(tx?: TransactionClient) {
+        return tx ? tx.prisma : this.prisma;
     }
 
-    async findById(userId: number, tx?: Prisma.TransactionClient): Promise<User> {
-        const client = this.getClient(tx);
-
-        return await client.user.findUnique({ where: { id: userId } });
-    }
-
-    async findByIdWithLock(userId: number, tx?: Prisma.TransactionClient): Promise<User> {
+    async findById(userId: number, tx?: TransactionClient): Promise<UserEntity> {
         const client = this.getClient(tx);
 
         return await client.user.findUnique({ where: { id: userId } });
@@ -27,8 +22,8 @@ export class UserPrismaRepository implements UserRepository {
     async updateUserBalance(
         userId: number,
         userChargePointRequestDto: UserChargePointRequestDto,
-        tx?: Prisma.TransactionClient,
-    ): Promise<User> {
+        tx?: TransactionClient,
+    ): Promise<UserEntity> {
         const client = this.getClient(tx);
 
         return await client.user.update({
