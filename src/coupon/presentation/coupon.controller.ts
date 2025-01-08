@@ -38,16 +38,8 @@ export class CouponController {
     })
     @ApiBadRequestResponse({ description: '비정상 쿠폰입니다.' })
     @ApiConflictResponse({ description: '발급 수량이 초과되었습니다.' })
-    async issueCoupon(@Param('couponId') couponId: string, @Query('userId') userId: string) {
-        return {
-            id: 1,
-            name: '쿠폰1',
-            discount_type: 'FIXED_AMOUNT',
-            discount_value: 2_000,
-            status: true,
-            start_at: new Date(),
-            end_at: new Date(),
-        };
+    async issueCoupon(@Param('couponId') couponId: number, @Query('userId') userId: number) {
+        return await this.couponService.issueCoupon(couponId, userId);
     }
 
     @Get('user/:userId')
