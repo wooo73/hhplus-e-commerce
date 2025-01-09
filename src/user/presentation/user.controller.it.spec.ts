@@ -5,9 +5,25 @@ import { USER_REPOSITORY } from '../domain/user.repository';
 import { UserPrismaRepository } from '../infrastructure/user.prisma.repository';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
+import { getPrismaClient } from '../../../test/it/util';
+import { PrismaClient } from '@prisma/client';
+import { UserEntity } from '../domain/user';
+
+let prisma: PrismaClient;
+
+const createMockUser = async () => {
+    prisma = await getPrismaClient();
+
+    const user = await prisma.user.create({
+        data: { balance: 10000 },
+    });
+
+    return user;
+};
 
 describe('UserController', () => {
     let controller: UserController;
+    let userMockData: UserEntity;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -21,11 +37,12 @@ describe('UserController', () => {
         }).compile();
 
         controller = module.get<UserController>(UserController);
+        userMockData = await createMockUser();
     });
 
     it('SUCCESS_1번 사용자에 대한 충전이 정상 작동해야합니다.', async () => {
         //given
-        const userId = 1;
+        const userId = userMockData.id;
         const userChargePointRequestDto = {
             amount: 500,
         };
@@ -40,7 +57,7 @@ describe('UserController', () => {
 
     it('SUCCESS_1번 사용자가 동시에 충전을 진행하여도 순차적으로 작동해야합니다.', async () => {
         //given
-        const userId = 1;
+        const userId = userMockData.id;
         const userChargePointRequestDto = {
             amount: 500,
         };
