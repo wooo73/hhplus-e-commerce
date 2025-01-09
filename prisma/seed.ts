@@ -1,12 +1,12 @@
 import { PrismaClient } from '@prisma/client';
-import { CouponStatus } from '../src/common/coupon.status';
+import { CouponStatus } from '../src/common/status';
 
 const prisma = new PrismaClient();
 
 async function main() {
-    // await initTable();
-    // await createMockData();
-    // await createMockCouponAndUserCouponData();
+    await initTable();
+    await createMockData();
+    await createMockCouponAndUserCouponData();
 }
 
 async function initTable() {

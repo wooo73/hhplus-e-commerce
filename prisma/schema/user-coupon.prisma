@@ -8,7 +8,7 @@ model UserCoupon {
   usedAt    DateTime? @map("used_at") @db.Timestamp(0)
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamp(0)
-  Order     Order?
+  Order     Order[]
 
   @@map("user_coupon")
 }
