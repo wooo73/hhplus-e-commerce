@@ -1,7 +1,17 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 import { PRODUCT_REPOSITORY, ProductRepository } from './product.repository';
 import { GetProductsQueryDTO } from '../presentation/dto/product.request.dto';
-import { ProductResponseDto } from '../presentation/dto/product.response.dto';
+import {
+    ProductResponseDto,
+    SpecialProductResponseDto,
+} from '../presentation/dto/product.response.dto';
 import { TransactionClient } from '../../common/transaction/transaction-client';
 import { ProductEntity } from './product';
 import { GetOrderProducts } from '../infrastructure/types/product';
@@ -78,5 +88,12 @@ export class ProductService {
         tx?: TransactionClient,
     ): Promise<void> {
         await this.productRepository.decreaseProductRemainingQuantity(productId, orderQuantity, tx);
+    }
+
+    async getSpecialProducts(): Promise<SpecialProductResponseDto[]> {
+        const currentDate = dayjs().tz('Asia/Seoul').startOf('day').format('YYYY-MM-DD');
+        const pastDate = dayjs(currentDate).subtract(3, 'day').startOf('day').format('YYYY-MM-DD');
+
+        return await this.productRepository.getSpecialProducts(pastDate, currentDate);
     }
 }

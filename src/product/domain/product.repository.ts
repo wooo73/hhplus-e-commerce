@@ -2,7 +2,7 @@ import { GetProductsQueryDTO } from '../presentation/dto/product.request.dto';
 import { TransactionClient } from '../../common/transaction/transaction-client';
 import { ProductEntity } from './product';
 import { OrderProductRemainingQuantity } from '../infrastructure/types/product-quantity';
-import { GetOrderProducts } from '../infrastructure/types/product';
+import { GetOrderProducts, specialProducts } from '../infrastructure/types/product';
 import { ProductQuantityEntity } from './product-quantity';
 
 export interface ProductRepository {
@@ -21,6 +21,11 @@ export interface ProductRepository {
         orderQuantity: number,
         tx?: TransactionClient,
     ): Promise<ProductQuantityEntity>;
+    getSpecialProducts(
+        startDate: string,
+        endDate: string,
+        tx?: TransactionClient,
+    ): Promise<specialProducts[]>;
 }
 
 export const PRODUCT_REPOSITORY = Symbol('PRODUCT_REPOSITORY');
