@@ -55,13 +55,12 @@ async function createMockData() {
     }
 }
 
-//쿠폰 생성 및 재고 생성 & 유저 쿠폰 지급
 const createMockCouponAndUserCouponData = async () => {
-    const type = ['PERCENT', 'PRICE'];
-    const discountValue = [10, 2000];
+    const type = ['PERCENT', 'PRICE', 'PRICE'];
+    const discountValue = [10, 2000, 2000];
 
     const coupons = await Promise.all(
-        Array.from({ length: 2 }, (_, index) =>
+        Array.from({ length: 3 }, (_, index) =>
             prisma.coupon.create({
                 data: {
                     name: `테스트쿠폰${index + 1}`,
@@ -72,8 +71,8 @@ const createMockCouponAndUserCouponData = async () => {
                     endAt: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 1),
                     couponQuantity: {
                         create: {
-                            quantity: 10,
-                            remainingQuantity: 10,
+                            quantity: index === 3 ? 10 : 10,
+                            remainingQuantity: index === 3 ? 10 : 2,
                         },
                     },
                 },
