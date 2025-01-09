@@ -2,6 +2,7 @@ import { TransactionClient } from 'src/common/transaction/transaction-client';
 import { CouponEntity } from './coupon';
 import { UserCouponEntity } from './userCoupon';
 import { CouponQuantityEntity } from './coupon-quantity';
+import { UserCouponToUseResponseDto } from '../presentation/dto/coupon.response.dto';
 
 export interface CouponRepository {
     getUserOwnedCouponIds(userId: number, tx?: TransactionClient): Promise<{ couponId: number }[]>;
@@ -31,6 +32,12 @@ export interface CouponRepository {
         { take, skip }: { take: number; skip: number },
         tx?: TransactionClient,
     ): Promise<UserCouponEntity[]>;
+    findByUserCouponIdWithLock(
+        userCouponId: number,
+        userId: number,
+        tx?: TransactionClient,
+    ): Promise<UserCouponToUseResponseDto>;
+    updateCouponStatus(userCouponId: number, userId: number, tx?: TransactionClient): Promise<void>;
 }
 
 export const COUPON_REPOSITORY = Symbol('COUPON_REPOSITORY');

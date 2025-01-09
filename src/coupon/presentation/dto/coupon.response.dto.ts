@@ -1,6 +1,7 @@
 import { Coupon, UserCoupon } from '@prisma/client';
 import { CouponEntity } from '../../domain/coupon';
 import { UserCouponEntity } from '../../domain/userCoupon';
+import { IntersectionType } from '@nestjs/swagger';
 
 export class UserCouponResponseDto extends UserCouponEntity {
     constructor(userCoupon: UserCoupon) {
@@ -23,3 +24,5 @@ export class AvailableCouponResponseDto extends CouponEntity {
         return new AvailableCouponResponseDto(coupon);
     }
 }
+
+export class UserCouponToUseResponseDto extends IntersectionType(CouponEntity, UserCouponEntity) {}

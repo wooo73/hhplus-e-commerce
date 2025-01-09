@@ -3,14 +3,17 @@ import { COUPON_REPOSITORY, CouponRepository } from './coupon.repository';
 
 import {
     TRANSACTION_MANAGER,
+    TransactionClient,
     TransactionManager,
 } from '../../common/transaction/transaction-client';
 
 import {
     AvailableCouponResponseDto,
     UserCouponResponseDto,
+    UserCouponToUseResponseDto,
 } from '../presentation/dto/coupon.response.dto';
 import { GetUserCouponQueryDTO } from '../presentation/dto/coupon.request.dto';
+import { CouponType } from '../../common/status';
 
 @Injectable()
 export class CouponService {
@@ -73,5 +76,48 @@ export class CouponService {
             skip: query.skip,
         });
         return userCoupons.map((userCoupon) => UserCouponResponseDto.of(userCoupon));
+    }
+
+    async getUserCouponToUseWithLock(
+        userCouponId: number,
+        userId: number,
+        tx?: TransactionClient,
+    ): Promise<UserCouponToUseResponseDto> {
+        const userCoupon = await this.couponRepository.findByUserCouponIdWithLock(
+            userId,
+            userCouponId,
+            tx,
+        );
+
+        if (!userCoupon) {
+            throw new BadRequestException('쿠폰을 찾을 수 없습니다.');
+        }
+
+        return userCoupon;
+    }
+
+    validateAndCalculateDiscountAmount(
+        userCoupon: UserCouponToUseResponseDto,
+        totalAmount: number,
+    ) {
+        const { discountType, discountValue } = userCoupon;
+
+        if (!discountType || !discountValue) {
+            throw new BadRequestException('사용할 수 없는 쿠폰입니다.');
+        }
+
+        let discountAmount = 0;
+
+        if (discountType === CouponType.PRICE) {
+            discountAmount = discountValue;
+        } else if (discountType === CouponType.PERCENT) {
+            discountAmount = Math.round(totalAmount * (discountValue / 100));
+        }
+
+        return discountAmount;
+    }
+
+    async useCoupon(userCouponId: number, userId: number, tx?: TransactionClient): Promise<void> {
+        return await this.couponRepository.updateCouponStatus(userCouponId, userId, tx);
     }
 }

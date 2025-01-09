@@ -6,6 +6,7 @@ import { TransactionClient } from '../../common/transaction/transaction-client';
 import { CouponEntity } from '../domain/coupon';
 import { UserCouponEntity } from '../domain/userCoupon';
 import { CouponQuantityEntity } from '../domain/coupon-quantity';
+import { UserCouponToUseResponseDto } from '../presentation/dto/coupon.response.dto';
 
 @Injectable()
 export class CouponPrismaRepository implements CouponRepository {
@@ -108,11 +109,53 @@ export class CouponPrismaRepository implements CouponRepository {
         tx?: TransactionClient,
     ): Promise<UserCouponEntity[]> {
         const client = this.getClient(tx);
-        console.log(take, skip);
         return await client.userCoupon.findMany({
             where: { userId },
             take,
             skip,
+        });
+    }
+
+    async findByUserCouponIdWithLock(
+        userCouponId: number,
+        userId: number,
+        tx?: TransactionClient,
+    ): Promise<UserCouponToUseResponseDto> {
+        const client = this.getClient(tx);
+
+        //TODO: 잠금은 userCoupon 테이블만 걸어야함.
+        const coupon = await client.$queryRaw`
+            SELECT 
+                uc.user_id AS userId,
+                uc.coupon_id AS couponId,
+                uc.is_used AS isUsed,
+                uc.used_at AS usedAt,
+                c.discount_type AS discountType,
+                c.discount_value AS discountValue
+            FROM user_coupon uc 
+            JOIN coupon c ON uc.coupon_id = c.id
+            WHERE uc.id = ${userCouponId} 
+            AND uc.user_id = ${userId} 
+            AND uc.is_used = FALSE
+            AND uc.used_at IS NULL
+            AND c.status = '${CouponStatus.AVAILABLE}'
+            AND c.end_at > NOW()
+            FOR UPDATE
+        `;
+
+        return coupon[0];
+    }
+
+    async updateCouponStatus(
+        userCouponId: number,
+        userId: number,
+        tx?: TransactionClient,
+    ): Promise<void> {
+        const client = this.getClient(tx);
+
+        await client.userCoupon.update({
+            where: { id: userCouponId, userId },
+            data: { isUsed: true, usedAt: new Date() },
         });
     }
 }

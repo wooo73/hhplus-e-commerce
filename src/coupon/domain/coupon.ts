@@ -8,7 +8,7 @@ export class CouponEntity implements Coupon {
     @ApiProperty({ example: '쿠폰 이름', description: '쿠폰 이름' })
     name: string;
 
-    @ApiProperty({ example: 'FIXED_AMOUNT', description: '할인 타입(FIXED_AMOUNT, PERCENTAGE)' })
+    @ApiProperty({ example: 'PRICE', description: '할인 타입(PRICE, PERCENT)' })
     discountType: string;
 
     @ApiProperty({ example: 1000, description: '할인 값 (금액 or %)' })
