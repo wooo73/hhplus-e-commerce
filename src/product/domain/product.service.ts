@@ -4,7 +4,6 @@ import { GetProductsQueryDTO } from '../presentation/dto/product.request.dto';
 import { ProductResponseDto } from '../presentation/dto/product.response.dto';
 import { TransactionClient } from '../../common/transaction/transaction-client';
 import { ProductEntity } from './product';
-import { OrderProductRemainingQuantity } from '../infrastructure/types/product-quantity';
 import { GetOrderProducts } from '../infrastructure/types/product';
 
 @Injectable()
@@ -36,14 +35,22 @@ export class ProductService {
         return availableProduct;
     }
 
-    async findOrderProductRemainingQuantityWithLock(
-        productIds: number[],
+    async validateProductRemainingQuantityWithLock(
+        productId: number,
+        orderQuantity: number,
         tx?: TransactionClient,
-    ): Promise<OrderProductRemainingQuantity[]> {
-        return await this.productRepository.findOrderProductRemainingQuantityWithLock(
-            productIds,
+    ): Promise<boolean> {
+        const quantity = await this.productRepository.findOrderProductRemainingQuantityWithLock(
+            productId,
+            orderQuantity,
             tx,
         );
+
+        if (!quantity) {
+            throw new BadRequestException('상품 재고가 부족합니다.');
+        }
+
+        return quantity ? true : false;
     }
 
     async calculateQuantityProductPrice(
@@ -63,5 +70,13 @@ export class ProductService {
                 totalPrice: productInfo.price * orderProduct.quantity,
             };
         });
+    }
+
+    async decreaseProductRemainingQuantity(
+        productId: number,
+        orderQuantity: number,
+        tx?: TransactionClient,
+    ): Promise<void> {
+        await this.productRepository.decreaseProductRemainingQuantity(productId, orderQuantity, tx);
     }
 }

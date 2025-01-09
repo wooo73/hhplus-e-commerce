@@ -4,10 +4,10 @@ import { ProductRepository } from '../domain/product.repository';
 import { GetProductsQueryDTO } from '../presentation/dto/product.request.dto';
 import { TransactionClient } from '../../common/transaction/transaction-client';
 import { ProductEntity } from '../domain/product';
-import { Prisma } from '@prisma/client';
 import { OrderProductRemainingQuantity } from './types/product-quantity';
 import { GetOrderProducts } from './types/product';
 import { ProductStatus } from '../../common/status';
+import { ProductQuantityEntity } from '../domain/product-quantity';
 
 @Injectable()
 export class ProductPrismaRepository implements ProductRepository {
@@ -57,11 +57,28 @@ export class ProductPrismaRepository implements ProductRepository {
     }
 
     async findOrderProductRemainingQuantityWithLock(
-        productIds: number[],
+        productId: number,
+        orderQuantity: number,
         tx?: TransactionClient,
     ): Promise<OrderProductRemainingQuantity[]> {
         const client = this.getClient(tx);
 
-        return await client.$queryRaw`SELECT * FROM product_quantity WHERE product_id IN (${Prisma.join(productIds)}) FOR UPDATE`;
+        const quantity =
+            await client.$queryRaw`SELECT * FROM product_quantity WHERE product_id = ${productId} AND remaining_quantity > ${orderQuantity}  FOR UPDATE`;
+
+        return quantity[0];
+    }
+
+    async decreaseProductRemainingQuantity(
+        productId: number,
+        orderQuantity: number,
+        tx?: TransactionClient,
+    ): Promise<ProductQuantityEntity> {
+        const client = this.getClient(tx);
+
+        return await client.productQuantity.update({
+            where: { productId },
+            data: { remainingQuantity: { decrement: orderQuantity } },
+        });
     }
 }

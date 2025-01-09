@@ -3,6 +3,7 @@ import { TransactionClient } from '../../common/transaction/transaction-client';
 import { ProductEntity } from './product';
 import { OrderProductRemainingQuantity } from '../infrastructure/types/product-quantity';
 import { GetOrderProducts } from '../infrastructure/types/product';
+import { ProductQuantityEntity } from './product-quantity';
 
 export interface ProductRepository {
     getProducts(query: GetProductsQueryDTO): Promise<ProductEntity[]>;
@@ -11,9 +12,15 @@ export interface ProductRepository {
         tx?: TransactionClient,
     ): Promise<GetOrderProducts[]>;
     findOrderProductRemainingQuantityWithLock(
-        productIds: number[],
+        productId: number,
+        orderQuantity: number,
         tx?: TransactionClient,
     ): Promise<OrderProductRemainingQuantity[]>;
+    decreaseProductRemainingQuantity(
+        productId: number,
+        orderQuantity: number,
+        tx?: TransactionClient,
+    ): Promise<ProductQuantityEntity>;
 }
 
 export const PRODUCT_REPOSITORY = Symbol('PRODUCT_REPOSITORY');
