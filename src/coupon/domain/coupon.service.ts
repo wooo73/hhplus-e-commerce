@@ -84,8 +84,8 @@ export class CouponService {
         tx?: TransactionClient,
     ): Promise<UserCouponToUseResponseDto> {
         const userCoupon = await this.couponRepository.findByUserCouponIdWithLock(
-            userId,
             userCouponId,
+            userId,
             tx,
         );
 

@@ -122,6 +122,7 @@ export class CouponPrismaRepository implements CouponRepository {
         tx?: TransactionClient,
     ): Promise<UserCouponToUseResponseDto> {
         const client = this.getClient(tx);
+        const couponStatus = CouponStatus.AVAILABLE;
 
         //TODO: 잠금은 userCoupon 테이블만 걸어야함.
         const coupon = await client.$queryRaw`
@@ -138,7 +139,7 @@ export class CouponPrismaRepository implements CouponRepository {
             AND uc.user_id = ${userId} 
             AND uc.is_used = FALSE
             AND uc.used_at IS NULL
-            AND c.status = '${CouponStatus.AVAILABLE}'
+            AND c.status = ${couponStatus}
             AND c.end_at > NOW()
             FOR UPDATE
         `;

@@ -39,7 +39,6 @@ export class UserController {
         @Param('userId') userId: number,
         @Body() userChargePointRequestDto: UserChargePointRequestDto,
     ) {
-        console.log(typeof userChargePointRequestDto.amount, typeof userId);
         return await this.userService.chargeUserBalance(userId, userChargePointRequestDto);
     }
 }

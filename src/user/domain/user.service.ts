@@ -2,13 +2,14 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { USER_REPOSITORY, UserRepository } from './user.repository';
 import { UserChargePointRequestDto } from '../presentation/dto/user.request.dto';
 import { UserEntity } from './user';
+import { TransactionClient } from '../../common/transaction/transaction-client';
 
 @Injectable()
 export class UserService {
     constructor(@Inject(USER_REPOSITORY) private readonly userRepository: UserRepository) {}
 
-    async getUserBalance(userId: number): Promise<UserEntity> {
-        const user = await this.userRepository.findById(userId);
+    async getUserBalance(userId: number, tx?: TransactionClient): Promise<UserEntity> {
+        const user = await this.userRepository.findById(userId, tx);
         if (!user) {
             throw new NotFoundException('사용자를 찾을 수 없습니다.');
         }
