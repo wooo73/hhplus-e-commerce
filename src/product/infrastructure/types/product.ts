@@ -1,5 +1,5 @@
-import { ProductStatus } from 'src/common/status';
-import { ProductEntity } from 'src/product/domain/product';
+import { ProductStatus } from '../../../common/status';
+import { ProductEntity } from '../../../product/domain/product';
 
 export class GetOrderProducts extends ProductEntity {
     productQuantity: {
