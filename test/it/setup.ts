@@ -1,7 +1,4 @@
-import * as fs from 'fs';
 import { MySqlContainer } from '@testcontainers/mysql';
-import { getPrismaClient } from './util';
-import { PrismaClient } from '@prisma/client';
 import { execSync } from 'child_process';
 
 const init = async () => {

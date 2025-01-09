@@ -46,11 +46,3 @@ export const getPrismaClient = async () => {
         throw error;
     }
 };
-
-export const disconnectPrisma = async () => {
-    if (prismaClient) {
-        await prismaClient.$disconnect();
-    } else {
-        console.warn('PrismaClient is not initialized.');
-    }
-};
