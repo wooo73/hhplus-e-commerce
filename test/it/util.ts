@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm';
 import * as process from 'process';
+import { PrismaClient } from '@prisma/client';
 
 let datasource: DataSource;
 
@@ -21,4 +22,35 @@ export const getDatasource = async () => {
     });
     await datasource.initialize();
     return datasource;
+};
+
+let prismaClient: PrismaClient;
+
+export const getPrismaClient = async () => {
+    if (prismaClient) {
+        return prismaClient;
+    }
+
+    prismaClient = new PrismaClient({
+        datasources: {
+            db: {
+                url: process.env.DATABASE_URL,
+            },
+        },
+    });
+    try {
+        await prismaClient.$connect();
+        return prismaClient;
+    } catch (error) {
+        console.error('Failed to connect to database:', error);
+        throw error;
+    }
+};
+
+export const disconnectPrisma = async () => {
+    if (prismaClient) {
+        await prismaClient.$disconnect();
+    } else {
+        console.warn('PrismaClient is not initialized.');
+    }
 };

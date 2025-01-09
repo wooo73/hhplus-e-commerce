@@ -1,8 +1,8 @@
-import { getDatasource } from './util';
+import { disconnectPrisma } from './util';
 
 const down = async () => {
     await global.mysql.stop();
-    await (await getDatasource()).destroy();
+    await disconnectPrisma();
 };
 
 export default down;
