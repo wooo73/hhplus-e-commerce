@@ -9,5 +9,11 @@ export interface UserRepository {
         userChargePointRequestDto: UserChargePointRequestDto,
         tx?: TransactionClient,
     ): Promise<UserEntity>;
+    decreaseUserBalance(
+        userId: number,
+        amount: number,
+        tx?: TransactionClient,
+    ): Promise<UserEntity>;
+    findByIdWithLock(userId: number, tx?: TransactionClient): Promise<UserEntity>;
 }
 export const USER_REPOSITORY = Symbol('userRepository');

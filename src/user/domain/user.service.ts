@@ -27,4 +27,20 @@ export class UserService {
             throw err;
         }
     }
+
+    async useUserBalance(
+        userId: number,
+        amount: number,
+        tx: TransactionClient,
+    ): Promise<UserEntity> {
+        return await this.userRepository.decreaseUserBalance(userId, amount, tx);
+    }
+
+    async findByIdWithLock(userId: number, tx: TransactionClient): Promise<UserEntity> {
+        const user = await this.userRepository.findByIdWithLock(userId, tx);
+        if (!user) {
+            new NotFoundException('사용자를 찾을 수 없습니다.');
+        }
+        return user;
+    }
 }
