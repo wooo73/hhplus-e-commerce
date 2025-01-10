@@ -9,7 +9,7 @@ export class OrderEntity implements Order {
     userId: number;
 
     @ApiProperty({ example: 1, description: '쿠폰 ID' })
-    couponId: number = 0;
+    couponId: number | null = null;
 
     @ApiProperty({ example: 30_000, description: '총 주문 금액' })
     totalAmount: number;

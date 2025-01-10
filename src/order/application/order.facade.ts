@@ -25,7 +25,7 @@ export class OrderFacade {
     ) {}
 
     async order(orderRequestDto: OrderRequestDto) {
-        const { userId, couponId = 0, products } = orderRequestDto;
+        const { userId, couponId = null, products } = orderRequestDto;
 
         return await this.transactionManager.transaction(async (tx) => {
             // 주문 가능 상품 조회
@@ -48,7 +48,7 @@ export class OrderFacade {
             let discountAmount = 0;
             let finalAmount = totalAmount;
 
-            if (couponId > 0) {
+            if (couponId && couponId > 0) {
                 const userCoupon = await this.couponService.getUserCouponToUseWithLock(
                     couponId,
                     userId,
@@ -79,7 +79,6 @@ export class OrderFacade {
                 finalAmount,
                 status: OrderStatus.PENDING,
             };
-
             // 주문 정보 데이터 생성
             const createOrderDto = plainToInstance(CreateOrderDto, orderObj);
             const orderData = await this.orderService.createOrder(createOrderDto, tx);

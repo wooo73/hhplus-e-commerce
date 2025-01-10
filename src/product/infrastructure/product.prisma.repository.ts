@@ -64,7 +64,7 @@ export class ProductPrismaRepository implements ProductRepository {
         const client = this.getClient(tx);
 
         const quantity =
-            await client.$queryRaw`SELECT * FROM product_quantity WHERE product_id = ${productId} AND remaining_quantity > ${orderQuantity}  FOR UPDATE`;
+            await client.$queryRaw`SELECT * FROM product_quantity WHERE product_id = ${productId} AND remaining_quantity <> 0 AND remaining_quantity >= ${orderQuantity}  FOR UPDATE`;
 
         return quantity[0];
     }

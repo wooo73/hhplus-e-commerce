@@ -13,7 +13,6 @@ import { CouponService } from '../../coupon/domain/coupon.service';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { TRANSACTION_MANAGER } from '../../common/transaction/transaction-client';
 import { OrderRequestDto } from '../presentation/dto/order.request.dto';
-import { OrderStatus } from '../../common/status';
 
 jest.mock('../domain/order.service');
 jest.mock('../../user/domain/user.service');

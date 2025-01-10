@@ -1,7 +1,5 @@
-import { DataSource } from 'typeorm';
-import * as fs from 'fs';
 import { MySqlContainer } from '@testcontainers/mysql';
-import { getDatasource } from './util';
+import { execSync } from 'child_process';
 
 const init = async () => {
     await Promise.all([initMysql()]);
@@ -9,29 +7,29 @@ const init = async () => {
 
 const initMysql = async () => {
     const mysql = await new MySqlContainer('mysql:8')
-        .withDatabase('dbname')
+        .withDatabase('testDB')
         .withUser('root')
-        .withRootPassword('pw')
+        .withRootPassword('test1234')
         .start();
 
     global.mysql = mysql;
 
-    process.env.DB_HOST = mysql.getHost();
-    process.env.DB_PORT = mysql.getPort().toString();
-    process.env.DB_USERNAME = mysql.getUsername();
-    process.env.DB_PASSWORD = mysql.getUserPassword();
-    process.env.DB_DATABASE = mysql.getDatabase();
-    process.env.DB_LOGGING_ENABLED = 'true';
+    process.env.DATABASE_URL = `mysql://${mysql.getUsername()}:${mysql.getUserPassword()}@${mysql.getHost()}:${mysql.getPort()}/${mysql.getDatabase()}`;
 
-    const datasource = await getDatasource();
-    await datasource.runMigrations();
-    await insertTestData(datasource);
-};
+    try {
+        // schema.prisma 기반으로 테이블 생성
+        execSync('npx prisma db push --force-reset', {
+            stdio: 'inherit',
+            env: { ...process.env },
+        });
 
-const insertTestData = async (datasource: DataSource) => {
-    const importSql = fs.readFileSync('./test/it/import.sql').toString();
-    for (const sql of importSql.split(';').filter((s) => s.trim() !== '')) {
-        await datasource.query(sql);
+        execSync('npm run seed:test', {
+            stdio: 'inherit',
+            env: { ...process.env },
+        });
+    } catch (error) {
+        console.error('Migration failed:', error);
+        throw error;
     }
 };
 
