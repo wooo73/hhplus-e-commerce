@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ProductQuantity } from '@prisma/client';
 
-export class ProductQuantity {
+export class ProductQuantityEntity implements ProductQuantity {
     @ApiProperty({ example: 1, description: '상품 수량 ID' })
     id: number;
 

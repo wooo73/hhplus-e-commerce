@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { UserCoupon } from '@prisma/client';
 
-export class UserCoupon {
+export class UserCouponEntity implements UserCoupon {
     @ApiProperty({ example: 1, description: '사용자 쿠폰 ID' })
     id: number;
 

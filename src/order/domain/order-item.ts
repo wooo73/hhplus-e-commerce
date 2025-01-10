@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { OrderItem } from '@prisma/client';
 
-export class OrderItem {
+export class OrderItemEntity implements OrderItem {
     @ApiProperty({ example: 1, description: '주문 상품 ID' })
     id: number;
 
@@ -21,4 +22,14 @@ export class OrderItem {
 
     @ApiProperty({ example: '2025-01-01', description: '수정일' })
     updatedAt: Date;
+
+    //엔티티 객체 생성
+    static from(orderId: number, productId: number, quantity: number, price: number) {
+        const orderItem = new OrderItemEntity();
+        orderItem.orderId = orderId;
+        orderItem.productId = productId;
+        orderItem.quantity = quantity;
+        orderItem.price = price;
+        return orderItem;
+    }
 }

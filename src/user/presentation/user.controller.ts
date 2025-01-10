@@ -9,7 +9,7 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { UserChargePointRequestDto } from './dto/user.request.dto';
-import { UserBalanceResponseDto } from './dto/user.response.dto';
+import { UserEntity } from '../domain/user';
 
 @Controller('user')
 @ApiTags('User')
@@ -20,11 +20,11 @@ export class UserController {
     @ApiOperation({ summary: '잔액 조회', description: '사용자의 잔액을 조회합니다.' })
     @ApiParam({ type: String, name: 'userId', description: '사용자 ID' })
     @ApiOkResponse({
-        type: UserBalanceResponseDto,
+        type: UserEntity,
     })
     @ApiNotFoundResponse({ description: '사용자를 찾을 수 없습니다.' })
-    async getUserBalance(@Param('userId') userId: string) {
-        return { userId: 1, balance: 10_000 };
+    async getUserBalance(@Param('userId') userId: number) {
+        return await this.userService.getUserBalance(userId);
     }
 
     @Post(':userId/balance/charge')
@@ -32,13 +32,13 @@ export class UserController {
     @ApiParam({ type: String, name: 'userId', description: '사용자 ID' })
     @ApiBody({ type: UserChargePointRequestDto })
     @ApiOkResponse({
-        type: UserBalanceResponseDto,
+        type: UserEntity,
     })
     @ApiNotFoundResponse({ description: '사용자를 찾을 수 없습니다.' })
     async chargePoint(
-        @Param('userId') userId: string,
-        @Body() UserChargePointRequestDto: UserChargePointRequestDto,
+        @Param('userId') userId: number,
+        @Body() userChargePointRequestDto: UserChargePointRequestDto,
     ) {
-        return { id: 1, balance: 15_000 };
+        return await this.userService.chargeUserBalance(userId, userChargePointRequestDto);
     }
 }

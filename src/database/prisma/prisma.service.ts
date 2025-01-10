@@ -26,6 +26,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
         if (this.configService.get('NODE_ENV') === 'dev') {
             (this.$on as any)('query', (e: Prisma.QueryEvent) => {
                 this.logger.debug(`Query: ${e.query}`);
+                this.logger.debug(`Param: ${e.params}`);
                 this.logger.debug(`Duration: ${e.duration}ms`);
             });
         }
