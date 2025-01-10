@@ -1,4 +1,4 @@
-import { TransactionClient } from 'src/common/transaction/transaction-client';
+import { TransactionClient } from '../../common/transaction/transaction-client';
 import { CouponEntity } from './coupon';
 import { UserCouponEntity } from './userCoupon';
 import { CouponQuantityEntity } from './coupon-quantity';
