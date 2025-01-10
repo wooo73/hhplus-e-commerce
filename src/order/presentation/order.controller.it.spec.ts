@@ -28,7 +28,7 @@ import { PrismaClient } from '@prisma/client';
 
 let prisma: PrismaClient;
 
-const createMockOrderData = async () => {
+export const createMockOrderData = async () => {
     prisma = await getPrismaClient();
 
     //사용자 생성

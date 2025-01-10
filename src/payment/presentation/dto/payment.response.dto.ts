@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { OrderResponseDto } from 'src/order/presentation/dto/order.response.dto';
+import { OrderResponseDto } from '../../../order/presentation/dto/order.response.dto';
 
 export class PaymentResponseDto extends OrderResponseDto {
     @ApiProperty({ example: 'PAID', description: '주문 상태(PENDING, PAID, CANCELLED)' })
