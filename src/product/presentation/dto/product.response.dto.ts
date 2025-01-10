@@ -2,8 +2,8 @@ import { ApiProperty, PickType } from '@nestjs/swagger';
 import { ProductEntity } from '../../domain/product';
 import { ProductQuantityEntity } from '../../domain/product-quantity';
 import { Product } from '@prisma/client';
-import { specialProducts } from 'src/product/infrastructure/types/product';
-import { ProductStatus } from 'src/common/status';
+import { specialProducts } from '../../../product/infrastructure/types/product';
+import { ProductStatus } from '../../../common/status';
 
 export class ProductQuantityDto extends PickType(ProductQuantityEntity, [
     'quantity',

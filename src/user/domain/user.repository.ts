@@ -1,5 +1,5 @@
 import { UserChargePointRequestDto } from '../presentation/dto/user.request.dto';
-import { TransactionClient } from 'src/common/transaction/transaction-client';
+import { TransactionClient } from '../../common/transaction/transaction-client';
 import { UserEntity } from './user';
 
 export interface UserRepository {

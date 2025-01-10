@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { OrderRepository } from '../domain/order.repository';
-import { PrismaService } from 'src/database/prisma/prisma.service';
+import { PrismaService } from '../../database/prisma/prisma.service';
 import { OrderEntity } from '../domain/order';
 import { OrderItemEntity } from '../domain/order-item';
-import { TransactionClient } from 'src/common/transaction/transaction-client';
+import { TransactionClient } from '../../common/transaction/transaction-client';
 import { OrderFindById } from './types/order';
-import { OrderStatus } from 'src/common/status';
+import { OrderStatus } from '../../common/status';
 
 @Injectable()
 export class OrderPrismaRepository implements OrderRepository {

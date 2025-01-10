@@ -5,16 +5,16 @@ import { ORDER_REPOSITORY } from './domain/order.repository';
 import { OrderPrismaRepository } from './infrastructure/order.prisma.repository';
 import { OrderFacade } from './application/order.facade';
 import { UserService } from '../user/domain/user.service';
-import { USER_REPOSITORY } from 'src/user/domain/user.repository';
-import { UserPrismaRepository } from 'src/user/infrastructure/user.prisma.repository';
+import { USER_REPOSITORY } from '../user/domain/user.repository';
+import { UserPrismaRepository } from '../user/infrastructure/user.prisma.repository';
 import { CouponService } from '../coupon/domain/coupon.service';
 import { ProductService } from '../product/domain/product.service';
-import { COUPON_REPOSITORY } from 'src/coupon/domain/coupon.repository';
-import { CouponPrismaRepository } from 'src/coupon/infrastructure/coupon.prisma.repository';
-import { PRODUCT_REPOSITORY } from 'src/product/domain/product.repository';
-import { ProductPrismaRepository } from 'src/product/infrastructure/product.prisma.repository';
-import { TRANSACTION_MANAGER } from 'src/common/transaction/transaction-client';
-import { PrismaTransactionManager } from 'src/common/transaction/prisma.transaction-client';
+import { COUPON_REPOSITORY } from '../coupon/domain/coupon.repository';
+import { CouponPrismaRepository } from '../coupon/infrastructure/coupon.prisma.repository';
+import { PRODUCT_REPOSITORY } from '../product/domain/product.repository';
+import { ProductPrismaRepository } from '../product/infrastructure/product.prisma.repository';
+import { TRANSACTION_MANAGER } from '../common/transaction/transaction-client';
+import { PrismaTransactionManager } from '../common/transaction/prisma.transaction-client';
 
 @Module({
     controllers: [OrderController],

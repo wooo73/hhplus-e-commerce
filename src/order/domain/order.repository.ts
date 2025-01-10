@@ -1,8 +1,8 @@
-import { OrderStatus } from 'src/common/status';
+import { OrderStatus } from '../../common/status';
 import { OrderFindById } from '../infrastructure/types/order';
 import { OrderEntity } from './order';
 import { OrderItemEntity } from './order-item';
-import { TransactionClient } from 'src/common/transaction/transaction-client';
+import { TransactionClient } from '../../common/transaction/transaction-client';
 
 export interface OrderRepository {
     createOrder(order: OrderEntity, tx?: TransactionClient): Promise<OrderEntity>;

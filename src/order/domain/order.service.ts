@@ -2,11 +2,11 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ORDER_REPOSITORY, OrderRepository } from './order.repository';
 import { CreateOrderDto } from './dto/create.order.dto';
 import { CreateOrderItemDto } from './dto/create.order-item.dto';
-import { TransactionClient } from 'src/common/transaction/transaction-client';
+import { TransactionClient } from '../../common/transaction/transaction-client';
 import { OrderItemEntity } from './order-item';
 import { OrderEntity } from './order';
 import { OrderFindById } from '../infrastructure/types/order';
-import { OrderStatus } from 'src/common/status';
+import { OrderStatus } from '../../common/status';
 
 @Injectable()
 export class OrderService {
