@@ -3,11 +3,14 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { PrismaService } from './database/prisma/prisma.service';
 import { ValidationPipe } from '@nestjs/common';
+import { GlobalExceptionFilter } from './common/exception/exception';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
+
+    app.useGlobalFilters(new GlobalExceptionFilter());
 
     const prismaService = app.get(PrismaService);
     await prismaService.enableShutdownHooks();
