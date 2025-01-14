@@ -1,46 +1,47 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { USER_REPOSITORY, UserRepository } from './user.repository';
 import { UserChargePointRequestDto } from '../presentation/dto/user.request.dto';
-import { UserEntity } from './user';
+import { UserDomain } from './user';
 import { TransactionClient } from '../../common/transaction/transaction-client';
+import { ErrorMessage } from '../../common/errorStatus';
 
 @Injectable()
 export class UserService {
     constructor(@Inject(USER_REPOSITORY) private readonly userRepository: UserRepository) {}
 
-    async getUserBalance(userId: number, tx?: TransactionClient): Promise<UserEntity> {
+    async getUserBalance(userId: number, tx?: TransactionClient): Promise<UserDomain> {
         const user = await this.userRepository.findById(userId, tx);
         if (!user) {
-            throw new NotFoundException('사용자를 찾을 수 없습니다.');
+            throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
         }
-        return user;
+        return UserDomain.from(user);
     }
 
     async chargeUserBalance(
         userId: number,
         userChargePointRequestDto: UserChargePointRequestDto,
-    ): Promise<UserEntity> {
-        try {
-            await this.getUserBalance(userId);
-            return await this.userRepository.updateUserBalance(userId, userChargePointRequestDto);
-        } catch (err) {
-            throw err;
-        }
+    ): Promise<UserDomain> {
+        await this.getUserBalance(userId);
+        const user = await this.userRepository.increaseUserBalance(
+            userId,
+            userChargePointRequestDto.amount,
+        );
+        return UserDomain.from(user);
     }
 
     async useUserBalance(
         userId: number,
         amount: number,
         tx: TransactionClient,
-    ): Promise<UserEntity> {
+    ): Promise<UserDomain> {
         return await this.userRepository.decreaseUserBalance(userId, amount, tx);
     }
 
-    async findByIdWithLock(userId: number, tx: TransactionClient): Promise<UserEntity> {
+    async findByIdWithLock(userId: number, tx: TransactionClient): Promise<UserDomain> {
         const user = await this.userRepository.findByIdWithLock(userId, tx);
         if (!user) {
-            new NotFoundException('사용자를 찾을 수 없습니다.');
+            throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
         }
-        return user;
+        return UserDomain.from(user);
     }
 }

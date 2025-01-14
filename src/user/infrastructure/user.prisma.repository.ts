@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { User } from '@prisma/client';
 import { PrismaService } from '../../database/prisma/prisma.service';
-import { UserChargePointRequestDto } from '../presentation/dto/user.request.dto';
 import { UserRepository } from '../domain/user.repository';
 import { TransactionClient } from '../../common/transaction/transaction-client';
-import { UserEntity } from '../domain/user';
 
 @Injectable()
 export class UserPrismaRepository implements UserRepository {
@@ -13,22 +12,22 @@ export class UserPrismaRepository implements UserRepository {
         return tx ? tx.prisma : this.prisma;
     }
 
-    async findById(userId: number, tx?: TransactionClient): Promise<UserEntity> {
+    async findById(userId: number, tx?: TransactionClient): Promise<User> {
         const client = this.getClient(tx);
 
         return await client.user.findUnique({ where: { id: userId } });
     }
 
-    async updateUserBalance(
+    async increaseUserBalance(
         userId: number,
-        userChargePointRequestDto: UserChargePointRequestDto,
+        amount: number,
         tx?: TransactionClient,
-    ): Promise<UserEntity> {
+    ): Promise<User> {
         const client = this.getClient(tx);
 
         return await client.user.update({
             where: { id: userId },
-            data: { balance: { increment: userChargePointRequestDto.amount } },
+            data: { balance: { increment: amount } },
         });
     }
 
@@ -36,7 +35,7 @@ export class UserPrismaRepository implements UserRepository {
         userId: number,
         amount: number,
         tx?: TransactionClient,
-    ): Promise<UserEntity> {
+    ): Promise<User> {
         const client = this.getClient(tx);
 
         return await client.user.update({
@@ -45,13 +44,9 @@ export class UserPrismaRepository implements UserRepository {
         });
     }
 
-    async findByIdWithLock(userId: number, tx?: TransactionClient): Promise<UserEntity> {
+    async findByIdWithLock(userId: number, tx?: TransactionClient): Promise<User> {
         const client = this.getClient(tx);
 
-        const user = await client.$queryRaw<
-            UserEntity[]
-        >`SELECT * FROM user WHERE id = ${userId} FOR UPDATE`;
-
-        return user[0];
+        return await client.$queryRaw`SELECT * FROM user WHERE id = ${userId} FOR UPDATE`;
     }
 }
