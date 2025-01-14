@@ -5,10 +5,26 @@ import { PaymentModule } from './payment/payment.module';
 import { ProductModule } from './product/product.module';
 import { UserModule } from './user/user.module';
 import { PrismaModule } from './database/prisma/prisma.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { LoggerModule } from './common/logger/logger.module';
 
 @Module({
-    imports: [PrismaModule, UserModule, ProductModule, OrderModule, CouponModule, PaymentModule],
+    imports: [
+        LoggerModule,
+        PrismaModule,
+        UserModule,
+        ProductModule,
+        OrderModule,
+        CouponModule,
+        PaymentModule,
+    ],
     controllers: [],
-    providers: [],
+    providers: [
+        {
+            provide: APP_INTERCEPTOR,
+            useClass: LoggingInterceptor,
+        },
+    ],
 })
 export class AppModule {}
