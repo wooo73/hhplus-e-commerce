@@ -8,9 +8,6 @@ interface IResponseError {
     timestamp: string;
     path: string;
     method: string;
-    params?: any;
-    query?: any;
-    body?: any;
 }
 
 const globalResponseError: (
@@ -24,9 +21,6 @@ const globalResponseError: (
         timestamp: new Date().toISOString(),
         path: request.url,
         method: request.method,
-        params: request?.params,
-        query: request?.query,
-        body: request?.body,
     };
 };
 
@@ -42,7 +36,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
             (exception as any)?.response?.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
 
         const ec = exception;
-
         if (ec instanceof HttpException) {
             status = (exception as HttpException).getStatus();
             message = (exception as any).getResponse()?.message
