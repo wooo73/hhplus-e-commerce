@@ -18,10 +18,10 @@ import { CouponPrismaRepository } from '../../coupon/infrastructure/coupon.prism
 import { ProductPrismaRepository } from '../../product/infrastructure/product.prisma.repository';
 import { PrismaTransactionManager } from '../../common/transaction/prisma.transaction-client';
 import { OrderRequestDto } from './dto/order.request.dto';
-import { UserEntity } from '../../user/domain/user';
-import { CouponEntity } from '../../coupon/domain/coupon';
-import { UserCouponEntity } from '../../coupon/domain/userCoupon';
-import { CouponQuantityEntity } from '../../coupon/domain/coupon-quantity';
+import { UserDomain } from '../../user/domain/user';
+import { CouponDomain } from '../../coupon/domain/coupon';
+import { UserCouponDomain } from '../../coupon/domain/userCoupon';
+import { CouponQuantityDomain } from '../../coupon/domain/coupon-quantity';
 import { CouponStatus, OrderStatus } from '../../common/status';
 import { getPrismaClient } from '../../../test/it/util';
 import { PrismaClient } from '@prisma/client';
@@ -75,10 +75,10 @@ describe('OrderController', () => {
 
     //mock 데이터
     let orderMockData: {
-        user: UserEntity;
-        coupon: CouponEntity;
-        userCoupon: UserCouponEntity;
-        couponQuantity: CouponQuantityEntity;
+        user: UserDomain;
+        coupon: CouponDomain;
+        userCoupon: UserCouponDomain;
+        couponQuantity: CouponQuantityDomain;
     };
 
     beforeEach(async () => {

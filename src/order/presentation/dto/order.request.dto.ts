@@ -1,7 +1,12 @@
-import { ApiProperty, PickType } from '@nestjs/swagger';
-import { OrderItemEntity } from '../../../order/domain/order-item';
+import { ApiProperty } from '@nestjs/swagger';
 
-class OrderProduct extends PickType(OrderItemEntity, ['productId', 'quantity'] as const) {}
+class OrderProduct {
+    @ApiProperty({ example: 1, description: '상품 ID' })
+    productId: number;
+
+    @ApiProperty({ example: 1, description: '상품 수량' })
+    quantity: number;
+}
 
 export class OrderRequestDto {
     @ApiProperty({ example: 1, description: '사용자 ID' })

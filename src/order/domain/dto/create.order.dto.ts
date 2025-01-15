@@ -1,22 +1,33 @@
-import { PickType } from '@nestjs/swagger';
-import { OrderEntity } from '../order';
+export class CreateOrderDto {
+    userId: number;
+    couponId: number;
+    totalAmount: number;
+    discountAmount: number;
+    finalAmount: number;
+    status: string;
 
-export class CreateOrderDto extends PickType(OrderEntity, [
-    'userId',
-    'couponId',
-    'totalAmount',
-    'discountAmount',
-    'finalAmount',
-    'status',
-] as const) {
-    toEntity() {
-        return OrderEntity.from(
-            this.userId,
-            this.couponId,
-            this.totalAmount,
-            this.discountAmount,
-            this.finalAmount,
-            this.status,
-        );
+    static from({
+        userId,
+        couponId,
+        totalAmount,
+        discountAmount,
+        finalAmount,
+        status,
+    }: {
+        userId: number;
+        couponId: number;
+        totalAmount: number;
+        discountAmount: number;
+        finalAmount: number;
+        status: string;
+    }) {
+        const order = new CreateOrderDto();
+        order.userId = userId;
+        order.couponId = couponId;
+        order.totalAmount = totalAmount;
+        order.discountAmount = discountAmount;
+        order.finalAmount = finalAmount;
+        order.status = status;
+        return order;
     }
 }

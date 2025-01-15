@@ -1,18 +1,22 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+
 import { OrderRequestDto } from '../presentation/dto/order.request.dto';
+import { OrderResponseDto } from '../presentation/dto/order.response.dto';
+import { CreateOrderDto } from '../domain/dto/create.order.dto';
+import { CreateOrderItemDto } from '../domain/dto/create.order-item.dto';
+
 import { UserService } from '../../user/domain/user.service';
 import { OrderService } from '../domain/order.service';
 import { ProductService } from '../../product/domain/product.service';
 import { CouponService } from '../../coupon/domain/coupon.service';
+
 import {
     TRANSACTION_MANAGER,
     TransactionManager,
 } from '../../common/transaction/transaction-client';
+
 import { OrderStatus } from '../../common/status';
-import { CreateOrderDto } from '../domain/dto/create.order.dto';
-import { plainToInstance } from 'class-transformer';
-import { CreateOrderItemDto } from '../domain/dto/create.order-item.dto';
-import { OrderResponseDto } from '../presentation/dto/order.response.dto';
+import { ErrorMessage } from '../../common/errorStatus';
 
 @Injectable()
 export class OrderFacade {
@@ -68,7 +72,7 @@ export class OrderFacade {
 
             const userBalance = user.balance;
             if (userBalance < finalAmount) {
-                throw new BadRequestException('잔액이 부족합니다.');
+                throw new BadRequestException(ErrorMessage.USER_BALANCE_NOT_ENOUGH);
             }
 
             const orderObj = {
@@ -79,30 +83,29 @@ export class OrderFacade {
                 finalAmount,
                 status: OrderStatus.PENDING,
             };
-            // 주문 정보 데이터 생성
-            const createOrderDto = plainToInstance(CreateOrderDto, orderObj);
-            const orderData = await this.orderService.createOrder(createOrderDto, tx);
 
-            const createOrderItemsDto = orderProductsPriceInfo.map((orderProduct) =>
-                plainToInstance(CreateOrderItemDto, {
+            // 주문 정보 데이터 생성
+            const order = await this.orderService.createOrder(CreateOrderDto.from(orderObj), tx);
+
+            const orderItemsDto = orderProductsPriceInfo.map((orderProduct) =>
+                CreateOrderItemDto.from({
                     ...orderProduct,
-                    orderId: orderData.id,
+                    orderId: order.id,
                 }),
             );
 
             const orderResponseData = {
-                ...orderData,
+                ...order,
                 orderItems: [],
             };
-            const orderResponseDto = plainToInstance(OrderResponseDto, orderResponseData);
 
             // 주문 상품 정보 데이터 생성
-            for (let item of createOrderItemsDto) {
+            for (let item of orderItemsDto) {
                 const orderItem = await this.orderService.createOrderItem(item, tx);
-                orderResponseDto.orderItems.push(orderItem);
+                orderResponseData.orderItems.push(orderItem);
             }
 
-            return orderResponseDto;
+            return OrderResponseDto.from(orderResponseData);
         });
     }
 }
