@@ -7,7 +7,7 @@ import { PrismaService } from '../../database/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { getPrismaClient } from '../../../test/it/util';
 import { PrismaClient } from '@prisma/client';
-import { UserEntity } from '../domain/user';
+import { UserDomain } from '../domain/user';
 
 let prisma: PrismaClient;
 
@@ -23,7 +23,7 @@ const createMockUser = async () => {
 
 describe('UserController', () => {
     let controller: UserController;
-    let userMockData: UserEntity;
+    let userMockData: UserDomain;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
