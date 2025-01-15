@@ -12,8 +12,10 @@ import {
     UserCouponResponseDto,
     UserCouponToUseResponseDto,
 } from '../presentation/dto/coupon.response.dto';
-import { GetUserCouponQueryDTO } from '../presentation/dto/coupon.request.dto';
+
 import { CouponType } from '../../common/status';
+import { getCurrentDate } from '../../common/util/date';
+import { ErrorMessage } from '../../common/errorStatus';
 
 @Injectable()
 export class CouponService {
@@ -27,24 +29,24 @@ export class CouponService {
         const userCouponIds = await this.couponRepository.getUserOwnedCouponIds(userId);
         const couponIds = userCouponIds.map((userCouponId) => userCouponId.couponId);
 
-        const nowDate: Date = new Date(new Date().toISOString().split('T')[0]);
+        const currentDate = getCurrentDate();
 
         // 발급 가능 쿠폰
-        const coupons = await this.couponRepository.getAvailableCoupons(couponIds, nowDate);
-        return coupons.map((coupon) => AvailableCouponResponseDto.of(coupon));
+        const coupons = await this.couponRepository.getAvailableCoupons(couponIds, currentDate);
+        return coupons.map((coupon) => AvailableCouponResponseDto.from(coupon));
     }
 
     async issueCoupon(couponId: number, userId: number): Promise<UserCouponResponseDto> {
-        const nowDate: Date = new Date(new Date().toISOString().split('T')[0]);
+        const currentDate = getCurrentDate();
 
         // 유효 쿠폰: 발급 가능 상태, 사용기간이 지나지 않은 쿠폰, 발급 이력 없는 쿠폰
         const isCouponValid = await this.couponRepository.couponValidCheck(
             couponId,
             userId,
-            nowDate,
+            currentDate,
         );
         if (!isCouponValid) {
-            throw new BadRequestException('쿠폰이 유효하지 않습니다.');
+            throw new BadRequestException(ErrorMessage.COUPON_INVALID);
         }
 
         return await this.transactionManager.transaction(async (tx) => {
@@ -54,7 +56,7 @@ export class CouponService {
                 tx,
             );
             if (!couponQuantity) {
-                throw new BadRequestException('발급 수량이 초과되었습니다.');
+                throw new BadRequestException(ErrorMessage.COUPON_QUANTITY_EXCEEDED);
             }
 
             //유저 쿠폰 지급
@@ -63,19 +65,17 @@ export class CouponService {
             //쿠폰 재고 차감
             await this.couponRepository.decrementCouponQuantity(couponId, tx);
 
-            return UserCouponResponseDto.of(userCoupon);
+            return UserCouponResponseDto.from(userCoupon);
         });
     }
 
     async getUserCoupons(
         userId: number,
-        query: GetUserCouponQueryDTO,
+        take: number,
+        skip: number,
     ): Promise<UserCouponResponseDto[]> {
-        const userCoupons = await this.couponRepository.getUserOwnedCoupons(userId, {
-            take: query.take,
-            skip: query.skip,
-        });
-        return userCoupons.map((userCoupon) => UserCouponResponseDto.of(userCoupon));
+        const userCoupons = await this.couponRepository.getUserOwnedCoupons(userId, take, skip);
+        return userCoupons.map((userCoupon) => UserCouponResponseDto.from(userCoupon));
     }
 
     async getUserCouponToUseWithLock(
@@ -90,10 +90,10 @@ export class CouponService {
         );
 
         if (!userCoupon) {
-            throw new BadRequestException('쿠폰을 찾을 수 없습니다.');
+            throw new BadRequestException(ErrorMessage.COUPON_NOT_FOUND);
         }
 
-        return userCoupon;
+        return UserCouponToUseResponseDto.from(userCoupon);
     }
 
     validateAndCalculateDiscountAmount(
@@ -103,7 +103,7 @@ export class CouponService {
         const { discountType, discountValue } = userCoupon;
 
         if (!discountType || !discountValue) {
-            throw new BadRequestException('사용할 수 없는 쿠폰입니다.');
+            throw new BadRequestException(ErrorMessage.COUPON_INVALID);
         }
 
         let discountAmount = 0;

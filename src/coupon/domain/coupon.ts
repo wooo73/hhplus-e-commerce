@@ -1,31 +1,45 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Coupon } from '@prisma/client';
-
-export class CouponEntity implements Coupon {
-    @ApiProperty({ example: 1, description: '쿠폰 ID' })
+export class CouponDomain {
     id: number;
-
-    @ApiProperty({ example: '쿠폰 이름', description: '쿠폰 이름' })
     name: string;
-
-    @ApiProperty({ example: 'PRICE', description: '할인 타입(PRICE, PERCENT)' })
     discountType: string;
-
-    @ApiProperty({ example: 1000, description: '할인 값 (금액 or %)' })
     discountValue: number;
-
-    @ApiProperty({ example: 'AVAILABLE', description: '사용 가능 여부' })
     status: string;
-
-    @ApiProperty({ example: '2025-01-01', description: '사용가능 시작일' })
     startAt: Date;
-
-    @ApiProperty({ example: '2025-01-10', description: '사용가능 종료일' })
     endAt: Date;
-
-    @ApiProperty({ example: '2025-01-01', description: '생성일' })
     createdAt: Date;
-
-    @ApiProperty({ example: '2025-01-01', description: '수정일' })
     updatedAt: Date;
+
+    static from({
+        id,
+        name,
+        discountType,
+        discountValue,
+        status,
+        startAt,
+        endAt,
+        createdAt,
+        updatedAt,
+    }: {
+        id: number;
+        name: string;
+        discountType: string;
+        discountValue: number;
+        status: string;
+        startAt: Date;
+        endAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
+    }) {
+        const dto = new CouponDomain();
+        dto.id = id;
+        dto.name = name;
+        dto.discountType = discountType;
+        dto.discountValue = discountValue;
+        dto.status = status;
+        dto.startAt = startAt;
+        dto.endAt = endAt;
+        dto.createdAt = createdAt;
+        dto.updatedAt = updatedAt;
+        return dto;
+    }
 }

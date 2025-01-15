@@ -1,16 +1,25 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { CouponQuantity } from '@prisma/client';
-
-export class CouponQuantityEntity implements CouponQuantity {
-    @ApiProperty({ example: 1, description: '쿠폰 수량 ID' })
+export class CouponQuantityDomain {
     id: number;
-
-    @ApiProperty({ example: 1, description: '쿠폰 ID' })
     couponId: number;
-
-    @ApiProperty({ example: 10, description: '총 재고' })
     quantity: number;
-
-    @ApiProperty({ example: 5, description: '남은 재고' })
     remainingQuantity: number;
+
+    static from({
+        id,
+        couponId,
+        quantity,
+        remainingQuantity,
+    }: {
+        id: number;
+        couponId: number;
+        quantity: number;
+        remainingQuantity: number;
+    }) {
+        const dto = new CouponQuantityDomain();
+        dto.id = id;
+        dto.couponId = couponId;
+        dto.quantity = quantity;
+        dto.remainingQuantity = remainingQuantity;
+        return dto;
+    }
 }
