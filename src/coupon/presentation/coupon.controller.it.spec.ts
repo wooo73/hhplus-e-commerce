@@ -10,8 +10,8 @@ import { PrismaTransactionManager } from '../../common/transaction/prisma.transa
 import { PrismaClient } from '@prisma/client';
 import { getPrismaClient } from '../../../test/it/util';
 import { CouponStatus } from '../../common/status';
-import { UserEntity } from '../../user/domain/user';
-import { CouponEntity } from '../domain/coupon';
+import { UserDomain } from '../../user/domain/user';
+import { CouponDomain } from '../domain/coupon';
 
 let prisma: PrismaClient;
 
@@ -54,7 +54,7 @@ const createMockCouponAndUserCouponData = async () => {
 describe('CouponController', () => {
     let controller: CouponController;
     let prisma: PrismaService;
-    let couponMockData: { users: UserEntity[]; coupon: CouponEntity };
+    let couponMockData: { users: UserDomain[]; coupon: CouponDomain };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({

@@ -53,6 +53,6 @@ export class CouponController {
         type: [UserCouponResponseDto],
     })
     async getUserCoupons(@Param('userId') userId: number, @Query() query: GetUserCouponQueryDTO) {
-        return await this.couponService.getUserCoupons(userId, query);
+        return await this.couponService.getUserCoupons(userId, query.take, query.skip);
     }
 }

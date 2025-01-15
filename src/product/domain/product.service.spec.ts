@@ -7,7 +7,7 @@ import { ProductPrismaRepository } from '../infrastructure/product.prisma.reposi
 import { TRANSACTION_MANAGER } from '../../common/transaction/transaction-client';
 import { PrismaTransactionManager } from '../../common/transaction/prisma.transaction-client';
 import { plainToInstance } from 'class-transformer';
-import { ProductEntity } from './product';
+import { ProductWithQuantityDomain } from './product-with-quantity';
 
 jest.mock('../../common/transaction/prisma.transaction-client.ts');
 jest.mock('../infrastructure/product.prisma.repository');
@@ -65,7 +65,9 @@ describe('ProductService', () => {
                 { id: 3, price: 3000 },
             ];
 
-            const entity = orderProductInfo.map((v) => plainToInstance(ProductEntity, v));
+            const entity = orderProductInfo.map((v) =>
+                plainToInstance(ProductWithQuantityDomain, v),
+            );
 
             const result = await service.calculateQuantityProductPrice(productsIds, entity);
 

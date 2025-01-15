@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { USER_REPOSITORY } from './user.repository';
 import { UserPrismaRepository } from '../infrastructure/user.prisma.repository';
-import { NotFoundException } from '@nestjs/common';
+import { ErrorMessage } from '../../common/errorStatus';
 
 jest.mock('../infrastructure/user.prisma.repository');
 
@@ -26,7 +27,7 @@ describe('UserService', () => {
 
         //when & then
         await expect(service.getUserBalance(userId)).rejects.toThrow(
-            new NotFoundException('사용자를 찾을 수 없습니다.'),
+            new NotFoundException(ErrorMessage.USER_NOT_FOUND),
         );
     });
 
@@ -40,7 +41,7 @@ describe('UserService', () => {
 
         //when & then
         await expect(service.chargeUserBalance(userId, userChargePointRequestDto)).rejects.toThrow(
-            new NotFoundException('사용자를 찾을 수 없습니다.'),
+            new NotFoundException(ErrorMessage.USER_NOT_FOUND),
         );
     });
 });

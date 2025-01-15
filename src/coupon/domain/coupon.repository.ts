@@ -1,20 +1,19 @@
 import { TransactionClient } from '../../common/transaction/transaction-client';
-import { CouponEntity } from './coupon';
-import { UserCouponEntity } from './userCoupon';
-import { CouponQuantityEntity } from './coupon-quantity';
-import { UserCouponToUseResponseDto } from '../presentation/dto/coupon.response.dto';
+import { CouponDomain } from './coupon';
+import { UserCouponDomain } from './userCoupon';
+import { CouponQuantityDomain } from './coupon-quantity';
 
 export interface CouponRepository {
     getUserOwnedCouponIds(userId: number, tx?: TransactionClient): Promise<{ couponId: number }[]>;
     getAvailableCoupons(
         couponIds: number[],
-        nowDate: Date,
+        nowDate: string,
         tx?: TransactionClient,
-    ): Promise<CouponEntity[]>;
+    ): Promise<CouponDomain[]>;
     couponValidCheck(
         couponId: number,
         userId: number,
-        nowDate: Date,
+        nowDate: string,
         tx?: TransactionClient,
     ): Promise<boolean>;
     couponQuantityValidCheckWithLock(couponId: number, tx: TransactionClient): Promise<boolean>;
@@ -22,21 +21,29 @@ export interface CouponRepository {
         couponId: number,
         userId: number,
         tx?: TransactionClient,
-    ): Promise<UserCouponEntity>;
+    ): Promise<UserCouponDomain>;
     decrementCouponQuantity(
         couponId: number,
         tx?: TransactionClient,
-    ): Promise<CouponQuantityEntity>;
+    ): Promise<CouponQuantityDomain>;
     getUserOwnedCoupons(
         userId: number,
-        { take, skip }: { take: number; skip: number },
+        take: number,
+        skip: number,
         tx?: TransactionClient,
-    ): Promise<UserCouponEntity[]>;
+    ): Promise<UserCouponDomain[]>;
     findByUserCouponIdWithLock(
         userCouponId: number,
         userId: number,
         tx?: TransactionClient,
-    ): Promise<UserCouponToUseResponseDto>;
+    ): Promise<{
+        userId: number;
+        couponId: number;
+        isUsed: boolean;
+        usedAt: Date;
+        discountType: string;
+        discountValue: number;
+    }>;
     updateCouponStatus(userCouponId: number, userId: number, tx?: TransactionClient): Promise<void>;
 }
 

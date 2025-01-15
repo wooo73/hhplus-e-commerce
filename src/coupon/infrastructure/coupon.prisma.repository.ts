@@ -3,10 +3,9 @@ import { PrismaService } from '../../database/prisma/prisma.service';
 import { CouponRepository } from '../domain/coupon.repository';
 import { CouponStatus } from '../../common/status';
 import { TransactionClient } from '../../common/transaction/transaction-client';
-import { CouponEntity } from '../domain/coupon';
-import { UserCouponEntity } from '../domain/userCoupon';
-import { CouponQuantityEntity } from '../domain/coupon-quantity';
-import { UserCouponToUseResponseDto } from '../presentation/dto/coupon.response.dto';
+import { CouponDomain } from '../domain/coupon';
+import { UserCouponDomain } from '../domain/userCoupon';
+import { CouponQuantityDomain } from '../domain/coupon-quantity';
 
 @Injectable()
 export class CouponPrismaRepository implements CouponRepository {
@@ -30,24 +29,26 @@ export class CouponPrismaRepository implements CouponRepository {
 
     async getAvailableCoupons(
         couponIds: number[],
-        nowDate: Date,
+        nowDate: string,
         tx?: TransactionClient,
-    ): Promise<CouponEntity[]> {
+    ): Promise<CouponDomain[]> {
         const client = this.getClient(tx);
 
-        return await client.coupon.findMany({
+        const coupons = await client.coupon.findMany({
             where: {
                 id: { notIn: couponIds },
                 status: CouponStatus.AVAILABLE,
-                endAt: { gte: nowDate },
+                endAt: { gte: new Date(nowDate) },
             },
         });
+
+        return coupons.map((coupon) => CouponDomain.from(coupon));
     }
 
     async couponValidCheck(
         couponId: number,
         userId: number,
-        nowDate: Date,
+        nowDate: string,
         tx?: TransactionClient,
     ): Promise<boolean> {
         const client = this.getClient(tx);
@@ -56,7 +57,7 @@ export class CouponPrismaRepository implements CouponRepository {
             where: {
                 id: couponId,
                 status: CouponStatus.AVAILABLE,
-                endAt: { gte: nowDate },
+                endAt: { gte: new Date(nowDate) },
                 userCoupon: { none: { couponId: couponId, userId: userId } },
             },
         });
@@ -83,44 +84,58 @@ export class CouponPrismaRepository implements CouponRepository {
         couponId: number,
         userId: number,
         tx?: TransactionClient,
-    ): Promise<UserCouponEntity> {
+    ): Promise<UserCouponDomain> {
         const client = this.getClient(tx);
 
-        return await client.userCoupon.create({
+        const userCoupon = await client.userCoupon.create({
             data: { couponId, userId },
         });
+
+        return UserCouponDomain.from(userCoupon);
     }
 
     async decrementCouponQuantity(
         couponId: number,
         tx?: TransactionClient,
-    ): Promise<CouponQuantityEntity> {
+    ): Promise<CouponQuantityDomain> {
         const client = this.getClient(tx);
 
-        return await client.couponQuantity.update({
+        const couponQuantity = await client.couponQuantity.update({
             where: { couponId },
             data: { remainingQuantity: { decrement: 1 } },
         });
+
+        return CouponQuantityDomain.from(couponQuantity);
     }
 
     async getUserOwnedCoupons(
         userId: number,
-        { take, skip }: { take: number; skip: number },
+        take: number,
+        skip: number,
         tx?: TransactionClient,
-    ): Promise<UserCouponEntity[]> {
+    ): Promise<UserCouponDomain[]> {
         const client = this.getClient(tx);
-        return await client.userCoupon.findMany({
+        const userCoupons = await client.userCoupon.findMany({
             where: { userId },
             take,
             skip,
         });
+
+        return userCoupons.map((userCoupon) => UserCouponDomain.from(userCoupon));
     }
 
     async findByUserCouponIdWithLock(
         userCouponId: number,
         userId: number,
         tx?: TransactionClient,
-    ): Promise<UserCouponToUseResponseDto> {
+    ): Promise<{
+        userId: number;
+        couponId: number;
+        isUsed: boolean;
+        usedAt: Date;
+        discountType: string;
+        discountValue: number;
+    }> {
         const client = this.getClient(tx);
         const couponStatus = CouponStatus.AVAILABLE;
 
@@ -140,7 +155,7 @@ export class CouponPrismaRepository implements CouponRepository {
             AND uc.is_used = FALSE
             AND uc.used_at IS NULL
             AND c.status = ${couponStatus}
-            AND c.end_at > NOW()
+            AND c.end_at >= NOW()
             FOR UPDATE
         `;
 

@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { OrderRepository } from '../domain/order.repository';
 import { PrismaService } from '../../database/prisma/prisma.service';
-import { OrderEntity } from '../domain/order';
-import { OrderItemEntity } from '../domain/order-item';
+import { OrderDomain } from '../domain/order';
+import { OrderItemDomain } from '../domain/order-item';
 import { TransactionClient } from '../../common/transaction/transaction-client';
-import { OrderFindById } from './types/order';
 import { OrderStatus } from '../../common/status';
+import { OrderWithItemDomain } from '../domain/order-with-item';
+import { CreateOrderDto } from '../domain/dto/create.order.dto';
 
 @Injectable()
 export class OrderPrismaRepository implements OrderRepository {
@@ -15,37 +16,46 @@ export class OrderPrismaRepository implements OrderRepository {
         return tx ? tx.prisma : this.prisma;
     }
 
-    async createOrder(order: OrderEntity, tx?: TransactionClient): Promise<OrderEntity> {
+    async createOrder(order: CreateOrderDto, tx?: TransactionClient): Promise<OrderDomain> {
         const client = this.getClient(tx);
 
-        return await client.order.create({ data: order });
+        const data = await client.order.create({ data: order });
+        return OrderDomain.from(data);
     }
 
     async createOrderItem(
-        orderItem: OrderItemEntity,
+        orderItem: OrderItemDomain,
         tx?: TransactionClient,
-    ): Promise<OrderItemEntity> {
+    ): Promise<OrderItemDomain> {
         const client = this.getClient(tx);
 
-        return await client.orderItem.create({ data: orderItem });
+        const data = await client.orderItem.create({ data: orderItem });
+        return OrderItemDomain.from(data);
     }
 
-    async findById(orderId: number, userId: number, tx: TransactionClient): Promise<OrderFindById> {
+    async findById(
+        orderId: number,
+        userId: number,
+        tx: TransactionClient,
+    ): Promise<OrderWithItemDomain> {
         const client = this.getClient(tx);
 
-        return await client.order.findUnique({
+        const orderWithItem = await client.order.findUnique({
             where: { id: orderId, userId },
             include: { orderItem: true },
         });
+
+        return OrderWithItemDomain.from(orderWithItem);
     }
 
     async updateOrderStatus(
         orderId: number,
         status: OrderStatus,
         tx: TransactionClient,
-    ): Promise<OrderEntity> {
+    ): Promise<OrderDomain> {
         const client = this.getClient(tx);
 
-        return await client.order.update({ where: { id: orderId }, data: { status } });
+        const data = await client.order.update({ where: { id: orderId }, data: { status } });
+        return OrderDomain.from(data);
     }
 }

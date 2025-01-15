@@ -21,10 +21,10 @@ import { TRANSACTION_MANAGER } from '../../common/transaction/transaction-client
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { getPrismaClient } from '../../../test/it/util';
 import { createMockOrderData } from '../../order/presentation/order.controller.it.spec';
-import { UserEntity } from '../../user/domain/user';
-import { CouponEntity } from '../../coupon/domain/coupon';
-import { UserCouponEntity } from '../../coupon/domain/userCoupon';
-import { CouponQuantityEntity } from '../../coupon/domain/coupon-quantity';
+import { UserDomain } from '../../user/domain/user';
+import { CouponDomain } from '../../coupon/domain/coupon';
+import { UserCouponDomain } from '../../coupon/domain/userCoupon';
+import { CouponQuantityDomain } from '../../coupon/domain/coupon-quantity';
 import { OrderStatus } from '../../common/status';
 
 let prisma: PrismaClient;
@@ -33,10 +33,10 @@ const createMockPaymentData = async () => {
     prisma = await getPrismaClient();
 
     const orderMockData: {
-        user: UserEntity;
-        coupon: CouponEntity;
-        userCoupon: UserCouponEntity;
-        couponQuantity: CouponQuantityEntity;
+        user: UserDomain;
+        coupon: CouponDomain;
+        userCoupon: UserCouponDomain;
+        couponQuantity: CouponQuantityDomain;
     } = await createMockOrderData();
 
     const orderProduct = await prisma.product.create({

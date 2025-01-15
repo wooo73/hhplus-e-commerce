@@ -11,6 +11,7 @@ import { BadRequestException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { UserCouponToUseResponseDto } from '../presentation/dto/coupon.response.dto';
 import { CouponType } from '../../common/status';
+import { ErrorMessage } from '../../common/errorStatus';
 
 jest.mock('../../common/transaction/prisma.transaction-client.ts');
 jest.mock('../infrastructure/coupon.prisma.repository');
@@ -41,14 +42,14 @@ describe('CouponService', () => {
     });
 
     describe('선착순 쿠폰 발급', () => {
-        it('FAIL_쿠폰이 상태가 비정상 이거나 사용기간이 지났거나 발급한 쿠폰일 경우 "쿠폰이 유효하지 않습니다." 라는 에러를 던져야 합니다.', async () => {
+        it('FAIL_쿠폰이 상태가 비정상 이거나 사용기간이 지났거나 발급한 쿠폰일 경우 "유효하지 않은 쿠폰입니다." 라는 에러를 던져야 합니다.', async () => {
             const couponId = 1;
             const userId = 1;
 
             repository.couponValidCheck.mockResolvedValue(false);
 
             await expect(service.issueCoupon(couponId, userId)).rejects.toThrow(
-                new BadRequestException('쿠폰이 유효하지 않습니다.'),
+                new BadRequestException(ErrorMessage.COUPON_INVALID),
             );
         });
 
@@ -63,7 +64,7 @@ describe('CouponService', () => {
             });
 
             await expect(service.issueCoupon(couponId, userId)).rejects.toThrow(
-                new BadRequestException('발급 수량이 초과되었습니다.'),
+                new BadRequestException(ErrorMessage.COUPON_QUANTITY_EXCEEDED),
             );
         });
     });
@@ -76,7 +77,7 @@ describe('CouponService', () => {
             repository.findByUserCouponIdWithLock.mockResolvedValue(null);
 
             await expect(service.getUserCouponToUseWithLock(userCouponId, userId)).rejects.toThrow(
-                new BadRequestException('쿠폰을 찾을 수 없습니다.'),
+                new BadRequestException(ErrorMessage.COUPON_NOT_FOUND),
             );
         });
 
@@ -101,7 +102,7 @@ describe('CouponService', () => {
                 throw new Error('test');
             } catch (error) {
                 expect(error).toBeInstanceOf(BadRequestException);
-                expect(error.message).toBe('사용할 수 없는 쿠폰입니다.');
+                expect(error.message).toBe(ErrorMessage.COUPON_INVALID);
             }
         });
 
@@ -126,7 +127,7 @@ describe('CouponService', () => {
                 throw new Error('test');
             } catch (error) {
                 expect(error).toBeInstanceOf(BadRequestException);
-                expect(error.message).toBe('사용할 수 없는 쿠폰입니다.');
+                expect(error.message).toBe(ErrorMessage.COUPON_INVALID);
             }
         });
 

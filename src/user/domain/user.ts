@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '@prisma/client';
 
-export class UserEntity implements User {
+export class UserDomain {
     @ApiProperty({ example: '1', description: '사용자 ID' })
     id: number;
 
@@ -13,4 +12,13 @@ export class UserEntity implements User {
 
     @ApiProperty({ example: '2025-01-01', description: '수정일' })
     updatedAt: Date;
+
+    static from({ id, balance, createdAt, updatedAt }) {
+        const user = new UserDomain();
+        user.id = id;
+        user.balance = balance;
+        user.createdAt = createdAt;
+        user.updatedAt = updatedAt;
+        return user;
+    }
 }
