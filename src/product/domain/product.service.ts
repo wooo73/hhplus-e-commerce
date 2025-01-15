@@ -1,11 +1,4 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import dayjs from 'dayjs';
-import timezone from 'dayjs/plugin/timezone';
-import utc from 'dayjs/plugin/utc';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
-
 import { PRODUCT_REPOSITORY, ProductRepository } from './product.repository';
 import {
     ProductResponseDto,
@@ -14,6 +7,7 @@ import {
 import { TransactionClient } from '../../common/transaction/transaction-client';
 import { ProductWithQuantityDomain } from './product-with-quantity';
 import { ErrorMessage } from '../../common/errorStatus';
+import { getCurrentDate, getPastDate } from '../../common/util/date';
 
 @Injectable()
 export class ProductService {
@@ -90,8 +84,8 @@ export class ProductService {
     }
 
     async getSpecialProducts(): Promise<SpecialProductResponseDto[]> {
-        const currentDate = dayjs().tz('Asia/Seoul').startOf('day').format('YYYY-MM-DD');
-        const pastDate = dayjs(currentDate).subtract(3, 'day').startOf('day').format('YYYY-MM-DD');
+        const currentDate = getCurrentDate();
+        const pastDate = getPastDate(3);
 
         const specialProducts = await this.productRepository.findSpecialProducts(
             pastDate,
