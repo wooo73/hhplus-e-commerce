@@ -1,31 +1,31 @@
-import { GetProductsQueryDTO } from '../presentation/dto/product.request.dto';
+import { ProductQuantity } from '@prisma/client';
+import { ProductWithQuantityDomain } from './product-with-quantity';
 import { TransactionClient } from '../../common/transaction/transaction-client';
-import { ProductEntity } from './product';
-import { OrderProductRemainingQuantity } from '../infrastructure/types/product-quantity';
-import { GetOrderProducts, specialProducts } from '../infrastructure/types/product';
-import { ProductQuantityEntity } from './product-quantity';
+import { ProductQuantityDomain } from './product-quantity';
 
 export interface ProductRepository {
-    getProducts(query: GetProductsQueryDTO): Promise<ProductEntity[]>;
+    findProducts(offset: number, size: number): Promise<ProductWithQuantityDomain[]>;
     findAvailableOrderProducts(
         productIds: number[],
         tx?: TransactionClient,
-    ): Promise<GetOrderProducts[]>;
+    ): Promise<ProductWithQuantityDomain[]>;
     findOrderProductRemainingQuantityWithLock(
         productId: number,
         orderQuantity: number,
         tx?: TransactionClient,
-    ): Promise<OrderProductRemainingQuantity[]>;
+    ): Promise<ProductQuantityDomain>;
     decreaseProductRemainingQuantity(
         productId: number,
         orderQuantity: number,
         tx?: TransactionClient,
-    ): Promise<ProductQuantityEntity>;
-    getSpecialProducts(
+    ): Promise<ProductQuantity>;
+    findSpecialProducts(
         startDate: string,
         endDate: string,
         tx?: TransactionClient,
-    ): Promise<specialProducts[]>;
+    ): Promise<
+        { productId: number; name: string; price: number; status: string; orderQuantity: number }[]
+    >;
 }
 
 export const PRODUCT_REPOSITORY = Symbol('PRODUCT_REPOSITORY');

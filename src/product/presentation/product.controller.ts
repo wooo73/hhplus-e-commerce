@@ -1,8 +1,8 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { ProductService } from '../domain/product.service';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ProductResponseDto, SpecialProductResponseDto } from './dto/product.response.dto';
 import { GetProductsQueryDTO } from './dto/product.request.dto';
+import { ProductResponseDto, SpecialProductResponseDto } from './dto/product.response.dto';
+import { ProductService } from '../domain/product.service';
 
 @Controller('product')
 @ApiTags('Product')
@@ -19,7 +19,7 @@ export class ProductController {
         type: [ProductResponseDto],
     })
     async getProducts(@Query() query: GetProductsQueryDTO) {
-        return await this.productService.getProducts(query);
+        return await this.productService.getProducts(query.offset, query.size);
     }
 
     @Get('/special')

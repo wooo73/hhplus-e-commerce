@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma/prisma.service';
-import { ProductRepository } from '../domain/product.repository';
-import { GetProductsQueryDTO } from '../presentation/dto/product.request.dto';
 import { TransactionClient } from '../../common/transaction/transaction-client';
-import { ProductEntity } from '../domain/product';
-import { OrderProductRemainingQuantity } from './types/product-quantity';
-import { GetOrderProducts, specialProducts } from './types/product';
 import { ProductStatus } from '../../common/status';
-import { ProductQuantityEntity } from '../domain/product-quantity';
+import { ProductRepository } from '../domain/product.repository';
+import { ProductWithQuantityDomain } from '../domain/product-with-quantity';
+import { ProductQuantityDomain } from '../domain/product-quantity';
 
 @Injectable()
 export class ProductPrismaRepository implements ProductRepository {
@@ -17,79 +14,81 @@ export class ProductPrismaRepository implements ProductRepository {
         return tx ? tx.prisma : this.prisma;
     }
 
-    async getProducts(
-        query: GetProductsQueryDTO,
+    async findProducts(
+        offset: number,
+        size: number,
         tx?: TransactionClient,
-    ): Promise<ProductEntity[]> {
+    ): Promise<ProductWithQuantityDomain[]> {
         const client = this.getClient(tx);
 
-        return await client.product.findMany({
+        const products = await client.product.findMany({
             include: {
                 productQuantity: {
-                    select: {
-                        quantity: true,
-                        remainingQuantity: true,
-                    },
+                    select: { quantity: true, remainingQuantity: true },
                 },
             },
-            skip: query.offset,
-            take: query.size,
+            skip: offset,
+            take: size,
         });
+
+        return products.map((product) => ProductWithQuantityDomain.from(product));
     }
 
     async findAvailableOrderProducts(
         productIds: number[],
         tx?: TransactionClient,
-    ): Promise<GetOrderProducts[]> {
+    ): Promise<ProductWithQuantityDomain[]> {
         const client = this.getClient(tx);
 
-        return await client.product.findMany({
+        const products = await client.product.findMany({
             where: { id: { in: productIds }, AND: { status: ProductStatus.IN_STOCK } },
             include: {
                 productQuantity: {
-                    select: {
-                        productId: true,
-                        remainingQuantity: true,
-                    },
+                    select: { quantity: true, remainingQuantity: true },
                 },
             },
         });
+        return products.map((product) => ProductWithQuantityDomain.from(product));
     }
 
     async findOrderProductRemainingQuantityWithLock(
         productId: number,
         orderQuantity: number,
         tx?: TransactionClient,
-    ): Promise<OrderProductRemainingQuantity[]> {
+    ): Promise<ProductQuantityDomain> {
         const client = this.getClient(tx);
 
         const quantity =
             await client.$queryRaw`SELECT * FROM product_quantity WHERE product_id = ${productId} AND remaining_quantity <> 0 AND remaining_quantity >= ${orderQuantity}  FOR UPDATE`;
 
-        return quantity[0];
+        return ProductQuantityDomain.from(quantity[0]);
     }
 
     async decreaseProductRemainingQuantity(
         productId: number,
         orderQuantity: number,
         tx?: TransactionClient,
-    ): Promise<ProductQuantityEntity> {
+    ): Promise<ProductQuantityDomain> {
         const client = this.getClient(tx);
 
-        return await client.productQuantity.update({
+        const quantity = await client.productQuantity.update({
             where: { productId },
             data: { remainingQuantity: { decrement: orderQuantity } },
         });
+
+        return ProductQuantityDomain.from(quantity);
     }
 
-    async getSpecialProducts(
+    async findSpecialProducts(
         startDate: string,
         endDate: string,
         tx?: TransactionClient,
-    ): Promise<specialProducts[]> {
+    ): Promise<
+        { productId: number; name: string; price: number; status: string; orderQuantity: number }[]
+    > {
         const client = this.getClient(tx);
 
-        const result = await client.$queryRaw<[specialProducts]>`
+        return await client.$queryRaw`
             SELECT
                  p.id AS productId,
                  p.name AS name,
@@ -104,7 +103,5 @@ export class ProductPrismaRepository implements ProductRepository {
             ORDER BY SUM(oi.quantity)
             DESC LIMIT 5
         `;
-
-        return result;
     }
 }
