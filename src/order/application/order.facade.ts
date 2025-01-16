@@ -35,6 +35,24 @@ export class OrderFacade {
             // 주문 가능 상품 조회
             const productsInfo = await this.productService.getAvailableOrderProducts(products, tx);
 
+            for (let item of productsInfo) {
+                const productInfo = products.find((product) => product.productId === item.id);
+
+                //주문 상품 재고 검증
+                await this.productService.validateProductRemainingQuantityWithLock(
+                    item.id,
+                    productInfo.quantity,
+                    tx,
+                );
+
+                //주문 상품 재고 차감
+                await this.productService.decreaseProductRemainingQuantity(
+                    item.id,
+                    productInfo.quantity,
+                    tx,
+                );
+            }
+
             // 유저 조회
             const user = await this.userService.getUserBalance(userId, tx);
 
