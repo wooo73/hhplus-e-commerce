@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaClient } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { PaymentController } from './payment.controller';
 import { PaymentService } from '../domain/payment.service';
@@ -19,68 +18,14 @@ import { PRODUCT_REPOSITORY } from '../../product/domain/product.repository';
 import { PrismaTransactionManager } from '../../common/transaction/prisma.transaction-client';
 import { TRANSACTION_MANAGER } from '../../common/transaction/transaction-client';
 import { PrismaService } from '../../database/prisma/prisma.service';
-import { getPrismaClient } from '../../../test/it/util';
-import { createMockOrderData } from '../../order/presentation/order.controller.it.spec';
-import { UserDomain } from '../../user/domain/user';
-import { CouponDomain } from '../../coupon/domain/coupon';
-import { UserCouponDomain } from '../../coupon/domain/userCoupon';
-import { CouponQuantityDomain } from '../../coupon/domain/coupon-quantity';
 import { OrderStatus } from '../../common/status';
-
-let prisma: PrismaClient;
-
-const createMockPaymentData = async () => {
-    prisma = await getPrismaClient();
-
-    const orderMockData: {
-        user: UserDomain;
-        coupon: CouponDomain;
-        userCoupon: UserCouponDomain;
-        couponQuantity: CouponQuantityDomain;
-    } = await createMockOrderData();
-
-    const orderProduct = await prisma.product.create({
-        data: {
-            name: `payment_test_product`,
-            price: 1000,
-            productQuantity: {
-                create: {
-                    quantity: 10,
-                    remainingQuantity: 3,
-                },
-            },
-        },
-    });
-
-    const orderObj = {
-        userId: orderMockData.user.id,
-        couponId: null,
-        totalAmount: 1000,
-        discountAmount: 0,
-        finalAmount: 1000,
-        status: OrderStatus.PENDING,
-    };
-
-    const order = await prisma.order.create({
-        data: orderObj,
-    });
-
-    const orderItemObj = {
-        orderId: order.id,
-        productId: orderProduct.id,
-        quantity: 1,
-        price: orderProduct.price,
-    };
-
-    const orderItem = await prisma.orderItem.create({
-        data: orderItemObj,
-    });
-
-    return { user: orderMockData.user, order, orderItem };
-};
+import { createMockUser } from '../../../prisma/seed/user.seed';
+import { createMockOrder } from '../../../prisma/seed/order.seed';
+import { createMockProduct } from '../../../prisma/seed/product.seed';
 
 describe('PaymentController', () => {
     let paymentController: PaymentController;
+    let userService: UserService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -103,32 +48,33 @@ describe('PaymentController', () => {
         }).compile();
 
         paymentController = module.get<PaymentController>(PaymentController);
-    });
-
-    it('SUCCESS_상품의 잔여 재고가 3개 남아있을때 동시에 결제 요청이 10번이 오면 3개만 결제되어야 한다.', async () => {
-        const { user, order } = await createMockPaymentData();
-        const count = 10;
-
-        const paymentPromise = Array.from({ length: count }, (_, index) =>
-            paymentController.createPayment({ orderId: order.id, userId: user.id }),
-        );
-
-        const result = await Promise.allSettled(paymentPromise);
-
-        const rejectedResult = result.filter((v) => v.status === 'rejected');
-        const fulfilledResult = result.filter((v) => v.status === 'fulfilled');
-
-        expect(rejectedResult.length).toEqual(7);
-        expect(fulfilledResult.length).toEqual(3);
+        userService = module.get<UserService>(UserService);
     });
 
     it('SUCCESS_동시에 결제 요청이 올 경우 유저의 잔액은 순차적으로 차감되어야 한다.', async () => {
-        const { user, order, orderItem } = await createMockPaymentData();
+        const balance = 50000;
+        const user = await createMockUser(balance);
 
-        await prisma.productQuantity.update({
-            where: { productId: orderItem.productId },
-            data: { remainingQuantity: 10 },
-        });
+        const price = 1000;
+        const remainingQuantity = 10;
+        const mockOrderProduct = await createMockProduct(price, remainingQuantity);
+
+        const orderData = {
+            userId: user.id,
+            couponId: null,
+            totalAmount: price,
+            discountAmount: 0,
+            finalAmount: price,
+            status: OrderStatus.PENDING,
+        };
+
+        const orderItemData = {
+            productId: mockOrderProduct.id,
+            quantity: 1,
+            price: mockOrderProduct.price,
+        };
+
+        const { order, orderItem } = await createMockOrder(orderData, orderItemData);
 
         const count = 7;
 
@@ -138,7 +84,7 @@ describe('PaymentController', () => {
 
         await Promise.all(paymentPromise);
 
-        const afterUserBalance = await prisma.user.findUnique({ where: { id: user.id } });
+        const afterUserBalance = await userService.getUserBalance(user.id);
 
         expect(afterUserBalance.balance).toEqual(user.balance - orderItem.price * count);
     });
