@@ -10,7 +10,7 @@ import {
 } from '@nestjs/swagger';
 import { PaymentRequestDto } from './dto/payment.request.dto';
 import { PaymentResponseDto } from './dto/payment.response.dto';
-import { PaymentFacade } from '../application/payment.pacade';
+import { PaymentFacade } from '../application/payment.facade';
 
 @Controller('payment')
 @ApiTags('Payment')

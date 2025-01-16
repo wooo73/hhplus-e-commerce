@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { PaymentController } from './payment.controller';
 import { PaymentService } from '../domain/payment.service';
-import { PaymentFacade } from '../application/payment.pacade';
+import { PaymentFacade } from '../application/payment.facade';
 import { OrderService } from '../../order/domain/order.service';
 import { UserService } from '../../user/domain/user.service';
 import { CouponService } from '../../coupon/domain/coupon.service';
