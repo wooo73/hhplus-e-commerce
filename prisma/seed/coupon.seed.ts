@@ -27,3 +27,11 @@ export const createMockCoupon = async (
 
     return coupon;
 };
+
+export const createUserCoupon = async (userId: number, couponId: number) => {
+    const userCoupon = await prisma.userCoupon.create({
+        data: { user: { connect: { id: userId } }, coupon: { connect: { id: couponId } } },
+    });
+
+    return userCoupon;
+};

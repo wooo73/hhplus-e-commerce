@@ -23,63 +23,16 @@ import { CouponDomain } from '../../coupon/domain/coupon';
 import { UserCouponDomain } from '../../coupon/domain/userCoupon';
 import { CouponQuantityDomain } from '../../coupon/domain/coupon-quantity';
 import { CouponStatus, OrderStatus } from '../../common/status';
-import { getPrismaClient } from '../../../test/it/util';
-import { PrismaClient } from '@prisma/client';
-
-let prisma: PrismaClient;
-
-export const createMockOrderData = async () => {
-    prisma = await getPrismaClient();
-
-    //사용자 생성
-    const user = await prisma.user.create({
-        data: { balance: 100000 },
-    });
-
-    //쿠폰 생성
-    const coupon = await prisma.coupon.create({
-        data: {
-            name: 'order_test',
-            status: CouponStatus.AVAILABLE,
-            discountType: 'PERCENT',
-            discountValue: 10,
-            startAt: new Date(),
-            endAt: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 1),
-            couponQuantity: { create: { quantity: 10, remainingQuantity: 10 } },
-        },
-    });
-
-    //쿠폰 지급
-    const userCoupon = await prisma.userCoupon.create({
-        data: { user: { connect: { id: user.id } }, coupon: { connect: { id: coupon.id } } },
-    });
-
-    //쿠폰 재고 차감
-    const couponQuantity = await prisma.couponQuantity.update({
-        where: {
-            couponId: coupon.id,
-        },
-        data: {
-            remainingQuantity: {
-                decrement: 1,
-            },
-        },
-    });
-
-    return { user, coupon, userCoupon, couponQuantity };
-};
+import { createMockUser } from '../../../prisma/seed/user.seed';
+import { createMockCoupon, createUserCoupon } from '../../../prisma/seed/coupon.seed';
+import { createMockProduct } from '../../../prisma/seed/product.seed';
 
 describe('OrderController', () => {
     let controller: OrderController;
-    let prisma: PrismaService;
 
-    //mock 데이터
-    let orderMockData: {
-        user: UserDomain;
-        coupon: CouponDomain;
-        userCoupon: UserCouponDomain;
-        couponQuantity: CouponQuantityDomain;
-    };
+    let user: UserDomain;
+    let coupon: CouponDomain;
+    let userCoupon: UserCouponDomain;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -102,12 +55,16 @@ describe('OrderController', () => {
 
         controller = module.get<OrderController>(OrderController);
 
-        orderMockData = await createMockOrderData();
+        const balance = 50000;
+
+        user = await createMockUser(balance);
+        coupon = await createMockCoupon(CouponStatus.AVAILABLE, 'PERCENT', 10, 10);
+        userCoupon = await createUserCoupon(user.id, coupon.id);
     });
 
     it('SUCCESS_쿠폰을 사용한 경우 주문이 정상적으로 완료되어야 합니다.', async () => {
-        const userId = orderMockData.user.id;
-        const userCouponId = orderMockData.userCoupon.id;
+        const userId = user.id;
+        const userCouponId = userCoupon.id;
 
         const orderRequestDto: OrderRequestDto = {
             userId,
@@ -128,7 +85,7 @@ describe('OrderController', () => {
     });
 
     it('SUCCESS_쿠폰을 사용하지 않은 경우 주문이 정상적으로 완료되어야 합니다.', async () => {
-        const userId = orderMockData.user.id;
+        const userId = user.id;
         const userCouponId = null;
 
         const orderRequestDto: OrderRequestDto = {
@@ -147,5 +104,56 @@ describe('OrderController', () => {
         expect(result.orderItems[0].productId).toEqual(orderRequestDto.products[0].productId);
         expect(result.orderItems[1].productId).toEqual(orderRequestDto.products[1].productId);
         expect(result.status).toEqual(OrderStatus.PENDING);
+    });
+
+    it('SUCCESS_1개의 주문을 1개의 쿠폰만 사용하여 동시에 5번 요청하면 1개의 주문에서만 사용되어야 합니다.', async () => {
+        const orderRequestDto: OrderRequestDto = {
+            userId: user.id,
+            couponId: userCoupon.id,
+            products: [{ productId: 1, quantity: 1 }],
+        };
+
+        const count = 5;
+
+        const orderPromise = Array.from({ length: count }, (_, index) =>
+            controller.createOrder(orderRequestDto),
+        );
+
+        const result = await Promise.allSettled(orderPromise);
+
+        const rejectedResult = result.filter((v) => v.status === 'rejected');
+        const fulfilledResult = result.filter((v) => v.status === 'fulfilled');
+
+        expect(fulfilledResult.length).toEqual(count - 4);
+        expect(rejectedResult.length).toEqual(count - 1);
+    });
+
+    it('SUCCESS_상품의 잔여 재고가 3개 남아있을때 동시에 서로 다른 유저의 주문 요청이 10번이 오면 3개의 주문만 완료되어야 합니다.', async () => {
+        const count = 10;
+
+        const productPrice = 5000;
+        const remainingQuantity = 3;
+        const mockProduct = await createMockProduct(productPrice, remainingQuantity);
+
+        const balance = 10000;
+        const users = await Promise.all(
+            Array.from({ length: count }, () => createMockUser(balance)),
+        );
+
+        const orderPromise = Array.from({ length: count }, (_, index) =>
+            controller.createOrder({
+                userId: users[index].id,
+                couponId: null,
+                products: [{ productId: mockProduct.id, quantity: 1 }],
+            }),
+        );
+
+        const result = await Promise.allSettled(orderPromise);
+
+        const rejectedResult = result.filter((v) => v.status === 'rejected');
+        const fulfilledResult = result.filter((v) => v.status === 'fulfilled');
+
+        expect(rejectedResult.length).toEqual(7);
+        expect(fulfilledResult.length).toEqual(3);
     });
 });
