@@ -19,7 +19,7 @@ async function initTable() {
 }
 
 async function createProductMockData() {
-    //상품 생성 및 재고 생성
+    //기본 상품 생성 및 재고 생성
     for (const index of [...Array(30).keys()]) {
         await prisma.product.create({
             data: {

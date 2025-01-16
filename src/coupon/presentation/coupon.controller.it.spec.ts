@@ -7,54 +7,13 @@ import { COUPON_REPOSITORY } from '../domain/coupon.repository';
 import { CouponPrismaRepository } from '../infrastructure/coupon.prisma.repository';
 import { TRANSACTION_MANAGER } from '../../common/transaction/transaction-client';
 import { PrismaTransactionManager } from '../../common/transaction/prisma.transaction-client';
-import { PrismaClient } from '@prisma/client';
-import { getPrismaClient } from '../../../test/it/util';
 import { CouponStatus } from '../../common/status';
-import { UserDomain } from '../../user/domain/user';
-import { CouponDomain } from '../domain/coupon';
-
-let prisma: PrismaClient;
-
-const createMockCouponAndUserCouponData = async () => {
-    prisma = await getPrismaClient();
-
-    const userCount = 7;
-    const type = 'PERCENT';
-    const discountValue = 10;
-    const remainingQuantity = 2;
-
-    const users = await Promise.all(
-        Array.from({ length: userCount }, () =>
-            prisma.user.create({
-                data: { balance: 10000 },
-            }),
-        ),
-    );
-
-    const coupon = await prisma.coupon.create({
-        data: {
-            name: `coupon_test`,
-            status: CouponStatus.AVAILABLE,
-            discountType: type,
-            discountValue: discountValue,
-            startAt: new Date(),
-            endAt: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 1),
-            couponQuantity: {
-                create: {
-                    quantity: 10,
-                    remainingQuantity,
-                },
-            },
-        },
-    });
-
-    return { users, coupon };
-};
+import { createMockUser } from '../../../prisma/seed/user.seed';
+import { createMockCoupon } from '../../../prisma/seed/coupon.seed';
 
 describe('CouponController', () => {
     let controller: CouponController;
     let prisma: PrismaService;
-    let couponMockData: { users: UserDomain[]; coupon: CouponDomain };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -76,14 +35,27 @@ describe('CouponController', () => {
 
         controller = module.get<CouponController>(CouponController);
         prisma = module.get<PrismaService>(PrismaService);
-
-        couponMockData = await createMockCouponAndUserCouponData();
     });
 
     it('SUCCESS_2개의 수량이 남은 3번 쿠폰에 대해 7명의 사용자가 쿠폰 발급 요청시 2개의 쿠폰만 발급되어야 한다.', async () => {
         //given
+        const userCount = 7;
+        const balance = 10000;
+        const users = await Promise.all(
+            Array.from({ length: userCount }, () => createMockUser(balance)),
+        );
 
-        const { users, coupon } = couponMockData;
+        const type = 'PERCENT';
+        const discountValue = 10;
+        const remainingQuantity = 2;
+
+        const coupon = await createMockCoupon(
+            CouponStatus.AVAILABLE,
+            type,
+            discountValue,
+            remainingQuantity,
+        );
+
         const userIds = users.map((user) => user.id);
         const couponId = coupon.id;
 

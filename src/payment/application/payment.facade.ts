@@ -33,22 +33,6 @@ export class PaymentFacade {
                 throw new BadRequestException('잔액이 부족합니다.');
             }
 
-            for (let item of order.orderItem) {
-                //주문 상품 재고 검증
-                await this.productService.validateProductRemainingQuantityWithLock(
-                    item.productId,
-                    item.quantity,
-                    tx,
-                );
-
-                //주문 상품 재고 차감
-                await this.productService.decreaseProductRemainingQuantity(
-                    item.productId,
-                    item.quantity,
-                    tx,
-                );
-            }
-
             //결제 금액 차감
             await this.userService.useUserBalance(userId, order.finalAmount, tx);
 
