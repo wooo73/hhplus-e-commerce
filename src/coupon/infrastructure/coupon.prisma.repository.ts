@@ -80,6 +80,18 @@ export class CouponPrismaRepository implements CouponRepository {
         return !remainingQuantity ? false : remainingQuantity <= 0 ? false : true;
     }
 
+    async couponQuantityValidCheck(couponId: number, tx: TransactionClient): Promise<boolean> {
+        const client = this.getClient(tx);
+
+        const couponQuantity = await client.$queryRaw<
+            { remaining_quantity: number }[]
+        >`SELECT remaining_quantity FROM coupon_quantity WHERE coupon_id = ${couponId}`;
+
+        const remainingQuantity = couponQuantity[0]?.remaining_quantity;
+
+        return !remainingQuantity ? false : remainingQuantity <= 0 ? false : true;
+    }
+
     async insertUserCoupon(
         couponId: number,
         userId: number,

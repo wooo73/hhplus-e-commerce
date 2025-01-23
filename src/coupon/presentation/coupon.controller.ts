@@ -43,6 +43,24 @@ export class CouponController {
         return await this.couponService.issueCoupon(couponId, userId);
     }
 
+    @Post(':couponId/issue/redis')
+    @ApiOperation({
+        summary: '쿠폰 발급',
+        description: '사용자에게 쿠폰을 발급합니다.',
+    })
+    @ApiOkResponse({
+        description: '발급된 쿠폰',
+        type: UserCouponResponseDto,
+    })
+    @ApiBadRequestResponse({ description: '쿠폰이 유효하지 않습니다.' })
+    @ApiConflictResponse({ description: '발급 수량이 초과되었습니다.' })
+    async issueCouponWithRedis(
+        @Param('couponId') couponId: number,
+        @Query('userId') userId: number,
+    ) {
+        return await this.couponService.issueCouponWithRedLock(couponId, userId);
+    }
+
     @Get('user/:userId')
     @ApiOperation({
         summary: '사용자 쿠폰 목록 조회',

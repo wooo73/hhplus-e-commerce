@@ -16,12 +16,14 @@ import {
 import { CouponType } from '../../common/status';
 import { getCurrentDate } from '../../common/util/date';
 import { ErrorMessage } from '../../common/errorStatus';
+import { RedisService } from '../../database/redis/redis.service';
 
 @Injectable()
 export class CouponService {
     constructor(
         @Inject(COUPON_REPOSITORY) private readonly couponRepository: CouponRepository,
         @Inject(TRANSACTION_MANAGER) private readonly transactionManager: TransactionManager,
+        private readonly redisService: RedisService,
     ) {}
 
     async getAvailableCoupons(userId: number): Promise<AvailableCouponResponseDto[]> {
@@ -67,6 +69,56 @@ export class CouponService {
 
             return UserCouponResponseDto.from(userCoupon);
         });
+    }
+
+    async issueCouponWithRedLock(couponId: number, userId: number): Promise<UserCouponResponseDto> {
+        const currentDate = getCurrentDate();
+
+        let lock;
+
+        try {
+            const retryCount = 10;
+            const retryDelay = 300;
+            await this.redisService.setRedLock(retryCount, retryDelay);
+
+            const lockDuration = 5000;
+            lock = await this.redisService.acquireLock(`issueCoupon:${couponId}`, lockDuration);
+
+            const isCouponValid = await this.couponRepository.couponValidCheck(
+                couponId,
+                userId,
+                currentDate,
+            );
+            if (!isCouponValid) {
+                throw new BadRequestException(ErrorMessage.COUPON_INVALID);
+            }
+
+            return await this.transactionManager.transaction(async (tx) => {
+                const couponQuantity = await this.couponRepository.couponQuantityValidCheck(
+                    couponId,
+                    tx,
+                );
+                if (!couponQuantity) {
+                    throw new BadRequestException(ErrorMessage.COUPON_QUANTITY_EXCEEDED);
+                }
+
+                //유저 쿠폰 지급
+                const userCoupon = await this.couponRepository.insertUserCoupon(
+                    couponId,
+                    userId,
+                    tx,
+                );
+
+                //쿠폰 재고 차감
+                await this.couponRepository.decrementCouponQuantity(couponId, tx);
+
+                return UserCouponResponseDto.from(userCoupon);
+            });
+        } catch (err) {
+            throw err;
+        } finally {
+            await this.redisService.releaseLock(lock);
+        }
     }
 
     async getUserCoupons(
