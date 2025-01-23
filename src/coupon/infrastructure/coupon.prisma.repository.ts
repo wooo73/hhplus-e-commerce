@@ -162,6 +162,43 @@ export class CouponPrismaRepository implements CouponRepository {
         return coupon[0];
     }
 
+    async findByUserCouponId(
+        userCouponId: number,
+        userId: number,
+        tx?: TransactionClient,
+    ): Promise<{
+        userId: number;
+        couponId: number;
+        isUsed: boolean;
+        usedAt: Date;
+        discountType: string;
+        discountValue: number;
+    }> {
+        const client = this.getClient(tx);
+        const couponStatus = CouponStatus.AVAILABLE;
+
+        //TODO: 잠금은 userCoupon 테이블만 걸어야함.
+        const coupon = await client.$queryRaw`
+            SELECT 
+                uc.user_id AS userId,
+                uc.coupon_id AS couponId,
+                uc.is_used AS isUsed,
+                uc.used_at AS usedAt,
+                c.discount_type AS discountType,
+                c.discount_value AS discountValue
+            FROM user_coupon uc 
+            JOIN coupon c ON uc.coupon_id = c.id
+            WHERE uc.id = ${userCouponId} 
+            AND uc.user_id = ${userId} 
+            AND uc.is_used = FALSE
+            AND uc.used_at IS NULL
+            AND c.status = ${couponStatus}
+            AND c.end_at >= NOW()        
+        `;
+
+        return coupon[0];
+    }
+
     async updateCouponStatus(
         userCouponId: number,
         userId: number,

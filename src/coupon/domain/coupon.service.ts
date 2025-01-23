@@ -96,6 +96,20 @@ export class CouponService {
         return UserCouponToUseResponseDto.from(userCoupon);
     }
 
+    async getUserCouponToUse(
+        userCouponId: number,
+        userId: number,
+        tx?: TransactionClient,
+    ): Promise<UserCouponToUseResponseDto> {
+        const userCoupon = await this.couponRepository.findByUserCouponId(userCouponId, userId, tx);
+
+        if (!userCoupon) {
+            throw new BadRequestException(ErrorMessage.COUPON_NOT_FOUND);
+        }
+
+        return UserCouponToUseResponseDto.from(userCoupon);
+    }
+
     validateAndCalculateDiscountAmount(
         userCoupon: UserCouponToUseResponseDto,
         totalAmount: number,

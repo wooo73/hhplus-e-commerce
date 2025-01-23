@@ -15,9 +15,12 @@ import { PRODUCT_REPOSITORY } from '../product/domain/product.repository';
 import { ProductPrismaRepository } from '../product/infrastructure/product.prisma.repository';
 import { TRANSACTION_MANAGER } from '../common/transaction/transaction-client';
 import { PrismaTransactionManager } from '../common/transaction/prisma.transaction-client';
+import { LoggerModule } from '../common/logger/logger.module';
+import { RedisModule } from '../database/redis/redis.module';
 
 @Module({
     controllers: [OrderController],
+    imports: [RedisModule, LoggerModule],
     providers: [
         OrderFacade,
         OrderService,

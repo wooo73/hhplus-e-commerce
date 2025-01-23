@@ -44,6 +44,18 @@ export interface CouponRepository {
         discountType: string;
         discountValue: number;
     }>;
+    findByUserCouponId(
+        userCouponId: number,
+        userId: number,
+        tx?: TransactionClient,
+    ): Promise<{
+        userId: number;
+        couponId: number;
+        isUsed: boolean;
+        usedAt: Date;
+        discountType: string;
+        discountValue: number;
+    }>;
     updateCouponStatus(userCouponId: number, userId: number, tx?: TransactionClient): Promise<void>;
 }
 
