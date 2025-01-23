@@ -21,11 +21,22 @@ export class UserService {
         userId: number,
         userChargePointRequestDto: UserChargePointRequestDto,
     ): Promise<UserDomain> {
-        await this.getUserBalance(userId);
-        const user = await this.userRepository.increaseUserBalance(
+        const { balance } = await this.getUserBalance(userId);
+
+        const currentBalance = balance;
+        const totalAmount = currentBalance + userChargePointRequestDto.amount;
+
+        const affectedRow = await this.userRepository.increaseUserBalance(
             userId,
-            userChargePointRequestDto.amount,
+            currentBalance,
+            totalAmount,
         );
+
+        if (!affectedRow) {
+            throw new BadRequestException(ErrorMessage.USER_BALANCE_INCREASE_FAILED);
+        }
+        const user = await this.getUserBalance(userId);
+
         return UserDomain.from(user);
     }
 
