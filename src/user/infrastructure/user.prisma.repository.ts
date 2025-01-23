@@ -33,15 +33,23 @@ export class UserPrismaRepository implements UserRepository {
 
     async decreaseUserBalance(
         userId: number,
+        balance: number,
         amount: number,
         tx?: TransactionClient,
-    ): Promise<User> {
+    ): Promise<boolean> {
         const client = this.getClient(tx);
 
-        return await client.user.update({
-            where: { id: userId },
-            data: { balance: { decrement: amount } },
+        const result = await client.user.updateMany({
+            where: {
+                id: userId,
+                balance,
+            },
+            data: {
+                balance: amount,
+            },
         });
+
+        return result.count === 1;
     }
 
     async findByIdWithLock(userId: number, tx?: TransactionClient): Promise<User> {

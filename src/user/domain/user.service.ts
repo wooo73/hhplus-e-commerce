@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { USER_REPOSITORY, UserRepository } from './user.repository';
 import { UserChargePointRequestDto } from '../presentation/dto/user.request.dto';
 import { UserDomain } from './user';
@@ -31,10 +31,22 @@ export class UserService {
 
     async useUserBalance(
         userId: number,
+        currentBalance: number,
         amount: number,
         tx: TransactionClient,
-    ): Promise<UserDomain> {
-        return await this.userRepository.decreaseUserBalance(userId, amount, tx);
+    ): Promise<void> {
+        const totalAmount = currentBalance - amount;
+
+        const affectedRow = await this.userRepository.decreaseUserBalance(
+            userId,
+            currentBalance,
+            totalAmount,
+            tx,
+        );
+
+        if (!affectedRow) {
+            throw new BadRequestException(ErrorMessage.USER_BALANCE_DECREASE_FAILED);
+        }
     }
 
     async findByIdWithLock(userId: number, tx: TransactionClient): Promise<UserDomain> {

@@ -41,10 +41,13 @@ export class OrderPrismaRepository implements OrderRepository {
         const client = this.getClient(tx);
 
         const orderWithItem = await client.order.findUnique({
-            where: { id: orderId, userId },
+            where: { id: orderId, userId, status: OrderStatus.PENDING },
             include: { orderItem: true },
         });
 
+        if (!orderWithItem) {
+            return null;
+        }
         return OrderWithItemDomain.from(orderWithItem);
     }
 

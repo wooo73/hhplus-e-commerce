@@ -51,7 +51,7 @@ describe('PaymentController', () => {
         userService = module.get<UserService>(UserService);
     });
 
-    it('SUCCESS_동시에 결제 요청이 올 경우 유저의 잔액은 순차적으로 차감되어야 한다.', async () => {
+    it('동시에 중복 결제 요청이 올 경우 유저의 잔액은 한번만 차감되어야 한다.', async () => {
         const balance = 50000;
         const user = await createMockUser(balance);
 
@@ -76,16 +76,22 @@ describe('PaymentController', () => {
 
         const { order, orderItem } = await createMockOrder(orderData, orderItemData);
 
-        const count = 7;
+        const count = 30;
 
         const paymentPromise = Array.from({ length: count }, () =>
             paymentController.createPayment({ orderId: order.id, userId: user.id }),
         );
 
-        await Promise.all(paymentPromise);
+        const result = await Promise.allSettled(paymentPromise);
+
+        const fulfilled = result.filter((r) => r.status === 'fulfilled');
+        const rejected = result.filter((r) => r.status === 'rejected');
+
+        expect(fulfilled.length).toEqual(count - 29);
+        expect(rejected.length).toEqual(count - 1);
 
         const afterUserBalance = await userService.getUserBalance(user.id);
 
-        expect(afterUserBalance.balance).toEqual(user.balance - orderItem.price * count);
+        expect(afterUserBalance.balance).toEqual(user.balance - orderItem.price);
     });
 });
