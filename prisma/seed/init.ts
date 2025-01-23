@@ -1,11 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../../src/database/prisma/prisma.service';
 
-const prisma = new PrismaClient();
-
-async function main() {
-    await initTable();
-    await createProductMockData();
-}
+const configService = new ConfigService();
+const prisma = new PrismaService(configService);
 
 async function initTable() {
     await prisma.productQuantity.deleteMany();
@@ -36,12 +33,7 @@ async function createProductMockData() {
     }
 }
 
-main()
-    .then(async () => {
-        await prisma.$disconnect();
-    })
-    .catch(async (e) => {
-        console.error(e);
-        await prisma.$disconnect();
-        process.exit(1);
-    });
+(async () => {
+    await initTable();
+    await createProductMockData();
+})();

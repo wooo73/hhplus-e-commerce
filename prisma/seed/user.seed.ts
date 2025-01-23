@@ -1,6 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../../src/database/prisma/prisma.service';
 
-const prisma = new PrismaClient();
+const configService = new ConfigService();
+const prisma = new PrismaService(configService);
 
 export const createMockUser = async (balance: number) => {
     const user = await prisma.user.create({
