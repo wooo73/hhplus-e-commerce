@@ -16,9 +16,11 @@ import { ProductPrismaRepository } from '../product/infrastructure/product.prism
 import { TRANSACTION_MANAGER } from '../common/transaction/transaction-client';
 import { PrismaTransactionManager } from '../common/transaction/prisma.transaction-client';
 import { PaymentFacade } from './application/payment.facade';
+import { RedisModule } from '../database/redis/redis.module';
 
 @Module({
     controllers: [PaymentController],
+    imports: [RedisModule],
     providers: [
         PaymentService,
         PaymentFacade,

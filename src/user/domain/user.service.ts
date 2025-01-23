@@ -35,6 +35,10 @@ export class UserService {
         amount: number,
         tx: TransactionClient,
     ): Promise<void> {
+        if (amount > currentBalance) {
+            throw new BadRequestException(ErrorMessage.USER_BALANCE_NOT_ENOUGH);
+        }
+
         const totalAmount = currentBalance - amount;
 
         const affectedRow = await this.userRepository.decreaseUserBalance(
