@@ -56,6 +56,24 @@ export class ProductService {
         return quantity ? true : false;
     }
 
+    async validateProductRemainingQuantity(
+        productId: number,
+        orderQuantity: number,
+        tx?: TransactionClient,
+    ): Promise<boolean> {
+        const quantity = await this.productRepository.findOrderProductRemainingQuantity(
+            productId,
+            orderQuantity,
+            tx,
+        );
+
+        if (!quantity) {
+            throw new BadRequestException(ErrorMessage.PRODUCT_OUT_OF_STOCK);
+        }
+
+        return quantity ? true : false;
+    }
+
     async calculateQuantityProductPrice(
         products: { productId: number; quantity: number }[],
         productsPriceInfo: ProductWithQuantityDomain[],

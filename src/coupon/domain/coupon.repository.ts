@@ -17,6 +17,7 @@ export interface CouponRepository {
         tx?: TransactionClient,
     ): Promise<boolean>;
     couponQuantityValidCheckWithLock(couponId: number, tx: TransactionClient): Promise<boolean>;
+    couponQuantityValidCheck(couponId: number, tx: TransactionClient): Promise<boolean>;
     insertUserCoupon(
         couponId: number,
         userId: number,
@@ -33,6 +34,18 @@ export interface CouponRepository {
         tx?: TransactionClient,
     ): Promise<UserCouponDomain[]>;
     findByUserCouponIdWithLock(
+        userCouponId: number,
+        userId: number,
+        tx?: TransactionClient,
+    ): Promise<{
+        userId: number;
+        couponId: number;
+        isUsed: boolean;
+        usedAt: Date;
+        discountType: string;
+        discountValue: number;
+    }>;
+    findByUserCouponId(
         userCouponId: number,
         userId: number,
         tx?: TransactionClient,

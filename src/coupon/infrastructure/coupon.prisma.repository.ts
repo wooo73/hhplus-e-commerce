@@ -80,6 +80,18 @@ export class CouponPrismaRepository implements CouponRepository {
         return !remainingQuantity ? false : remainingQuantity <= 0 ? false : true;
     }
 
+    async couponQuantityValidCheck(couponId: number, tx: TransactionClient): Promise<boolean> {
+        const client = this.getClient(tx);
+
+        const couponQuantity = await client.$queryRaw<
+            { remaining_quantity: number }[]
+        >`SELECT remaining_quantity FROM coupon_quantity WHERE coupon_id = ${couponId}`;
+
+        const remainingQuantity = couponQuantity[0]?.remaining_quantity;
+
+        return !remainingQuantity ? false : remainingQuantity <= 0 ? false : true;
+    }
+
     async insertUserCoupon(
         couponId: number,
         userId: number,
@@ -157,6 +169,43 @@ export class CouponPrismaRepository implements CouponRepository {
             AND c.status = ${couponStatus}
             AND c.end_at >= NOW()
             FOR UPDATE
+        `;
+
+        return coupon[0];
+    }
+
+    async findByUserCouponId(
+        userCouponId: number,
+        userId: number,
+        tx?: TransactionClient,
+    ): Promise<{
+        userId: number;
+        couponId: number;
+        isUsed: boolean;
+        usedAt: Date;
+        discountType: string;
+        discountValue: number;
+    }> {
+        const client = this.getClient(tx);
+        const couponStatus = CouponStatus.AVAILABLE;
+
+        //TODO: 잠금은 userCoupon 테이블만 걸어야함.
+        const coupon = await client.$queryRaw`
+            SELECT 
+                uc.user_id AS userId,
+                uc.coupon_id AS couponId,
+                uc.is_used AS isUsed,
+                uc.used_at AS usedAt,
+                c.discount_type AS discountType,
+                c.discount_value AS discountValue
+            FROM user_coupon uc 
+            JOIN coupon c ON uc.coupon_id = c.id
+            WHERE uc.id = ${userCouponId} 
+            AND uc.user_id = ${userId} 
+            AND uc.is_used = FALSE
+            AND uc.used_at IS NULL
+            AND c.status = ${couponStatus}
+            AND c.end_at >= NOW()        
         `;
 
         return coupon[0];

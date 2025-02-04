@@ -9,7 +9,14 @@ export class LoggerService {
         logger.info(message, { ip });
     }
 
-    error(req: Request, err: any) {
+    error(err: any) {
+        const message = `${err.message}`;
+        const trace = err.stack;
+
+        logger.error(message, { trace });
+    }
+
+    globalError(req: Request, err: any) {
         const ip = req.ip;
         const message = `${err.message} { Request: params: ${JSON.stringify(req?.params)} query: ${JSON.stringify(req?.query)} body: ${JSON.stringify(req?.body)} }`;
         const trace = err.stack;

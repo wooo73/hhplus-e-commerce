@@ -14,6 +14,13 @@ export interface ProductRepository {
         orderQuantity: number,
         tx?: TransactionClient,
     ): Promise<ProductQuantityDomain>;
+
+    findOrderProductRemainingQuantity(
+        productId: number,
+        orderQuantity: number,
+        tx?: TransactionClient,
+    ): Promise<ProductQuantityDomain>;
+
     decreaseProductRemainingQuantity(
         productId: number,
         orderQuantity: number,

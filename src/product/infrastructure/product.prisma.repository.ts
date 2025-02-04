@@ -64,6 +64,19 @@ export class ProductPrismaRepository implements ProductRepository {
         return ProductQuantityDomain.from(quantity[0]);
     }
 
+    async findOrderProductRemainingQuantity(
+        productId: number,
+        orderQuantity: number,
+        tx?: TransactionClient,
+    ): Promise<ProductQuantityDomain> {
+        const client = this.getClient(tx);
+
+        const quantity =
+            await client.$queryRaw`SELECT * FROM product_quantity WHERE product_id = ${productId} AND remaining_quantity <> 0 AND remaining_quantity >= ${orderQuantity}`;
+
+        return ProductQuantityDomain.from(quantity[0]);
+    }
+
     async decreaseProductRemainingQuantity(
         productId: number,
         orderQuantity: number,

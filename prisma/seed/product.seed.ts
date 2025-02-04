@@ -1,6 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../../src/database/prisma/prisma.service';
 
-const prisma = new PrismaClient();
+const configService = new ConfigService();
+const prisma = new PrismaService(configService);
 
 export const createMockProduct = async (price: number, remainingQuantity: number) => {
     const product = await prisma.product.create({
@@ -16,4 +18,11 @@ export const createMockProduct = async (price: number, remainingQuantity: number
         },
     });
     return product;
+};
+
+export const getProductQuantity = async (productId: number) => {
+    const productQuantity = await prisma.productQuantity.findUnique({
+        where: { productId },
+    });
+    return productQuantity;
 };

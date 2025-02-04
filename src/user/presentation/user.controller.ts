@@ -41,4 +41,22 @@ export class UserController {
     ) {
         return await this.userService.chargeUserBalance(userId, userChargePointRequestDto);
     }
+
+    @Post(':userId/balance/charge/redis')
+    @ApiOperation({ summary: '잔액 충전', description: '사용자의 잔액을 충전합니다.' })
+    @ApiParam({ type: String, name: 'userId', description: '사용자 ID' })
+    @ApiBody({ type: UserChargePointRequestDto })
+    @ApiOkResponse({
+        type: UserDomain,
+    })
+    @ApiNotFoundResponse({ description: '사용자를 찾을 수 없습니다.' })
+    async chargePointWithRedis(
+        @Param('userId') userId: number,
+        @Body() userChargePointRequestDto: UserChargePointRequestDto,
+    ) {
+        return await this.userService.chargeUserBalanceWithRedLock(
+            userId,
+            userChargePointRequestDto,
+        );
+    }
 }

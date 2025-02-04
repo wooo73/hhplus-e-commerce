@@ -20,7 +20,7 @@ export class LoggingInterceptor implements NestInterceptor {
                 this.logger.info(req, `${method} ${url} ${statusCode} ${delay}ms`);
             }),
             catchError((err) => {
-                this.logger.error(req, err);
+                this.logger.globalError(req, err);
                 return throwError(() => err);
             }),
         );
