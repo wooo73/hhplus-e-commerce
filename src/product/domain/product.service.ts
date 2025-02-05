@@ -7,7 +7,7 @@ import {
 import { TransactionClient } from '../../common/transaction/transaction-client';
 import { ProductWithQuantityDomain } from './product-with-quantity';
 import { ErrorMessage } from '../../common/errorStatus';
-import { getCurrentDate, getPastDate } from '../../common/util/date';
+import { getPastDate } from '../../common/util/date';
 
 @Injectable()
 export class ProductService {
@@ -101,15 +101,15 @@ export class ProductService {
         await this.productRepository.decreaseProductRemainingQuantity(productId, orderQuantity, tx);
     }
 
-    async getSpecialProducts(): Promise<SpecialProductResponseDto[]> {
-        const currentDate = getCurrentDate();
+    async getPopularProducts(): Promise<SpecialProductResponseDto[]> {
+        const currentDate = getPastDate(1);
         const pastDate = getPastDate(3);
 
-        const specialProducts = await this.productRepository.findSpecialProducts(
+        const popularProducts = await this.productRepository.findPopularProducts(
             pastDate,
             currentDate,
         );
 
-        return specialProducts.map((product) => SpecialProductResponseDto.from(product));
+        return popularProducts.map((product) => SpecialProductResponseDto.from(product));
     }
 }

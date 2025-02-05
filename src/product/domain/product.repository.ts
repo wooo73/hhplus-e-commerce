@@ -26,7 +26,7 @@ export interface ProductRepository {
         orderQuantity: number,
         tx?: TransactionClient,
     ): Promise<ProductQuantity>;
-    findSpecialProducts(
+    findPopularProducts(
         startDate: string,
         endDate: string,
         tx?: TransactionClient,

@@ -31,7 +31,7 @@ export class ProductController {
         description: '상위 상품 목록',
         type: [SpecialProductResponseDto],
     })
-    async getSpecialProducts() {
-        return await this.productService.getSpecialProducts();
+    async getPopularProducts() {
+        return await this.productService.getPopularProducts();
     }
 }

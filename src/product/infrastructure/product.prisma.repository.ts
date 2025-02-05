@@ -92,7 +92,7 @@ export class ProductPrismaRepository implements ProductRepository {
         return ProductQuantityDomain.from(quantity);
     }
 
-    async findSpecialProducts(
+    async findPopularProducts(
         startDate: string,
         endDate: string,
         tx?: TransactionClient,
