@@ -7,5 +7,6 @@ import { ProductPrismaRepository } from './infrastructure/product.prisma.reposit
 @Module({
     controllers: [ProductController],
     providers: [ProductService, { provide: PRODUCT_REPOSITORY, useClass: ProductPrismaRepository }],
+    exports: [ProductService, { provide: PRODUCT_REPOSITORY, useClass: ProductPrismaRepository }],
 })
 export class ProductModule {}

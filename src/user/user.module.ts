@@ -9,5 +9,6 @@ import { RedisModule } from '../database/redis/redis.module';
     imports: [RedisModule],
     controllers: [UserController],
     providers: [UserService, { provide: USER_REPOSITORY, useClass: UserPrismaRepository }],
+    exports: [UserService, { provide: USER_REPOSITORY, useClass: UserPrismaRepository }],
 })
 export class UserModule {}

@@ -21,5 +21,6 @@ import { RedisModule } from '../database/redis/redis.module';
             useClass: PrismaTransactionManager,
         },
     ],
+    exports: [CouponService, { provide: COUPON_REPOSITORY, useClass: CouponPrismaRepository }],
 })
 export class CouponModule {}
