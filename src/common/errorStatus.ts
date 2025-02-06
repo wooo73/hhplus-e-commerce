@@ -11,4 +11,6 @@ export enum ErrorMessage {
     COUPON_NOT_FOUND = '쿠폰을 찾을 수 없습니다.',
     COUPON_INVALID = '유효하지 않은 쿠폰입니다.',
     COUPON_QUANTITY_EXCEEDED = '발급 수량이 초과되었습니다.',
+    COUPON_REQUEST_DUPLICATED = '이미 발급 요청된 쿠폰입니다.',
+    COUPON_ISSUE_DUPLICATED = '이미 발급된 쿠폰입니다.',
 }
