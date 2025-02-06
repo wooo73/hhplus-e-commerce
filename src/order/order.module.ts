@@ -21,6 +21,10 @@ import { CouponModule } from '../coupon/coupon.module';
         { provide: ORDER_REPOSITORY, useClass: OrderPrismaRepository },
         { provide: TRANSACTION_MANAGER, useClass: PrismaTransactionManager },
     ],
-    exports: [OrderService, { provide: ORDER_REPOSITORY, useClass: OrderPrismaRepository }],
+    exports: [
+        OrderFacade,
+        OrderService,
+        { provide: ORDER_REPOSITORY, useClass: OrderPrismaRepository },
+    ],
 })
 export class OrderModule {}

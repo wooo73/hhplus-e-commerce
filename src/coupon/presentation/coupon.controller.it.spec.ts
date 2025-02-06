@@ -1,34 +1,32 @@
 import { Test, TestingModule } from '@nestjs/testing';
+
+import { PrismaModule } from '../../database/prisma/prisma.module';
+import { CouponModule } from '../coupon.module';
+
 import { ConfigService } from '@nestjs/config';
 import { CouponController } from './coupon.controller';
 import { CouponService } from '../domain/coupon.service';
-import { PrismaService } from '../../database/prisma/prisma.service';
-import { COUPON_REPOSITORY } from '../domain/coupon.repository';
-import { CouponPrismaRepository } from '../infrastructure/coupon.prisma.repository';
+
 import { TRANSACTION_MANAGER } from '../../common/transaction/transaction-client';
 import { PrismaTransactionManager } from '../../common/transaction/prisma.transaction-client';
 import { CouponStatus } from '../../common/status';
 import { createMockUser } from '../../../prisma/seed/user.seed';
 import { createMockCoupon } from '../../../prisma/seed/coupon.seed';
 import { RedisModule } from '../../database/redis/redis.module';
-import { RedisService } from '../../database/redis/redis.service';
+import { RedlockService } from '../../database/redis/redlock.service';
+
+import { LoggerModule } from '../../common/logger/logger.module';
 
 describe('CouponController', () => {
     let controller: CouponController;
-    let redisService: RedisService;
+    let redlockService: RedlockService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            imports: [RedisModule],
+            imports: [PrismaModule, RedisModule, LoggerModule, CouponModule],
             controllers: [CouponController],
             providers: [
-                PrismaService,
                 ConfigService,
-                CouponService,
-                {
-                    provide: COUPON_REPOSITORY,
-                    useClass: CouponPrismaRepository,
-                },
                 {
                     provide: TRANSACTION_MANAGER,
                     useClass: PrismaTransactionManager,
@@ -37,11 +35,11 @@ describe('CouponController', () => {
         }).compile();
 
         controller = module.get<CouponController>(CouponController);
-        redisService = module.get<RedisService>(RedisService);
+        redlockService = module.get<RedlockService>(RedlockService);
     });
 
     afterEach(async () => {
-        await redisService.quit();
+        await redlockService.quit();
     });
 
     it('남은 쿠폰의 재고에 맞게 쿠폰이 발급되어야 한다.', async () => {

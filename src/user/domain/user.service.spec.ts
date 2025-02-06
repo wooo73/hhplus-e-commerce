@@ -4,8 +4,10 @@ import { UserService } from './user.service';
 import { USER_REPOSITORY } from './user.repository';
 import { UserPrismaRepository } from '../infrastructure/user.prisma.repository';
 import { ErrorMessage } from '../../common/errorStatus';
+import { RedisModule } from '../../database/redis/redis.module';
 
 jest.mock('../infrastructure/user.prisma.repository');
+jest.mock('../../database/redis/redlock.service');
 
 describe('UserService', () => {
     let service: UserService;
@@ -13,6 +15,7 @@ describe('UserService', () => {
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
+            imports: [RedisModule],
             providers: [UserService, { provide: USER_REPOSITORY, useClass: UserPrismaRepository }],
         }).compile();
 

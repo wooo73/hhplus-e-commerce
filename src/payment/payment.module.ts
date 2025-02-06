@@ -18,5 +18,6 @@ import { OrderModule } from '../order/order.module';
         PaymentFacade,
         { provide: TRANSACTION_MANAGER, useClass: PrismaTransactionManager },
     ],
+    exports: [PaymentFacade, PaymentService],
 })
 export class PaymentModule {}

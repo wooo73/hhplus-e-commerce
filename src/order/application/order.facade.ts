@@ -17,7 +17,7 @@ import {
 
 import { OrderStatus } from '../../common/status';
 import { ErrorMessage } from '../../common/errorStatus';
-import { RedisService } from '../../database/redis/redis.service';
+import { RedlockService } from '../../database/redis/redlock.service';
 import { LoggerService } from '../../common/logger/logger.service';
 
 @Injectable()
@@ -27,7 +27,7 @@ export class OrderFacade {
         private readonly userService: UserService,
         private readonly productService: ProductService,
         private readonly couponService: CouponService,
-        private readonly redisService: RedisService,
+        private readonly redlockService: RedlockService,
         private readonly loggerService: LoggerService,
         @Inject(TRANSACTION_MANAGER) private readonly transactionManager: TransactionManager,
     ) {}
@@ -141,11 +141,11 @@ export class OrderFacade {
         try {
             const retryCount = 10;
             const retryDelay = 300;
-            await this.redisService.setRedLock(retryCount, retryDelay);
+            await this.redlockService.setRedLock(retryCount, retryDelay);
 
             for (const product of products) {
                 const key = `order:${product.productId}`;
-                const lock = await this.redisService.acquireLock(key, lockDuration);
+                const lock = await this.redlockService.acquireLock(key, lockDuration);
                 locks.push(lock);
             }
 
@@ -251,7 +251,7 @@ export class OrderFacade {
             throw err;
         } finally {
             for (const lock of locks) {
-                await this.redisService.releaseLock(lock);
+                await this.redlockService.releaseLock(lock);
             }
         }
     }

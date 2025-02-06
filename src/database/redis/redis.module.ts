@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { RedisModule as IORedisModule } from '@nestjs-modules/ioredis';
-import { RedisService } from './redis.service';
+import { RedlockService } from './redlock.service';
 import { LoggerModule } from '../../common/logger/logger.module';
 
 @Module({
@@ -16,7 +16,7 @@ import { LoggerModule } from '../../common/logger/logger.module';
             }),
         }),
     ],
-    providers: [RedisService],
-    exports: [RedisService],
+    providers: [RedlockService],
+    exports: [RedlockService],
 })
 export class RedisModule {}
