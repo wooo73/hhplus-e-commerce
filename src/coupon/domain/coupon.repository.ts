@@ -58,6 +58,10 @@ export interface CouponRepository {
         discountValue: number;
     }>;
     updateCouponStatus(userCouponId: number, userId: number, tx?: TransactionClient): Promise<void>;
+    getCouponStock(couponId: number, tx?: TransactionClient): Promise<number | null>;
+    getUpcomingCouponList(
+        upcomingDate: string,
+    ): Promise<{ couponId: number; stock: number }[] | []>;
 }
 
 export const COUPON_REPOSITORY = Symbol('COUPON_REPOSITORY');
