@@ -5,7 +5,7 @@ import Redlock from 'redlock';
 import { LoggerService } from '../../common/logger/logger.service';
 
 @Injectable()
-export class RedisService {
+export class RedlockService {
     private redlock: Redlock;
     private lockDuration: 1000;
 
@@ -25,19 +25,6 @@ export class RedisService {
             retryCount: retryCount,
             retryDelay: retryDelay,
         });
-    }
-
-    async setNx(key: string, value: string, duration: number) {
-        const result = await this.redis.set(key, value, 'PX', duration, 'NX');
-        return result === 'OK';
-    }
-
-    async deleteKeys(key: string) {
-        return await this.redis.del(key);
-    }
-
-    async sleep(duration: number) {
-        return new Promise((resolve) => setTimeout(resolve, duration));
     }
 
     async acquireLock(key: string, duration: number = this.lockDuration) {

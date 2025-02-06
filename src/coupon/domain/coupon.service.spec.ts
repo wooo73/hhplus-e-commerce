@@ -7,14 +7,19 @@ import {
 } from '../../common/transaction/transaction-client';
 import { PrismaTransactionManager } from '../../common/transaction/prisma.transaction-client';
 import { CouponPrismaRepository } from '../infrastructure/coupon.prisma.repository';
+import { CouponRedisRepository } from '../infrastructure/coupon.redis.repository';
+
 import { BadRequestException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { UserCouponToUseResponseDto } from '../presentation/dto/coupon.response.dto';
 import { CouponType } from '../../common/status';
 import { ErrorMessage } from '../../common/errorStatus';
+import { RedisModule } from '../../database/redis/redis.module';
 
 jest.mock('../../common/transaction/prisma.transaction-client.ts');
 jest.mock('../infrastructure/coupon.prisma.repository');
+jest.mock('../infrastructure/coupon.redis.repository');
+jest.mock('../../database/redis/redlock.service');
 
 describe('CouponService', () => {
     let service: CouponService;
@@ -23,8 +28,10 @@ describe('CouponService', () => {
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
+            imports: [RedisModule],
             providers: [
                 CouponService,
+                CouponRedisRepository,
                 {
                     provide: COUPON_REPOSITORY,
                     useClass: CouponPrismaRepository,

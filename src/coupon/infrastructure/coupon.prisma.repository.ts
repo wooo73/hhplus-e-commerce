@@ -223,4 +223,30 @@ export class CouponPrismaRepository implements CouponRepository {
             data: { isUsed: true, usedAt: new Date() },
         });
     }
+
+    async getCouponStock(couponId: number, tx?: TransactionClient): Promise<number | null> {
+        const client = this.getClient(tx);
+        const coupon = await client.couponQuantity.findUnique({ where: { couponId } });
+        return coupon?.remainingQuantity ?? null;
+    }
+
+    async getUpcomingCouponList(
+        upcomingDate: string,
+    ): Promise<{ couponId: number; stock: number }[] | []> {
+        const client = this.getClient();
+
+        const upcomingCouponList = await client.$queryRaw<
+            { couponId: number; stock: number }[] | []
+        >`
+        SELECT 
+            c.id as couponId,
+            cq.remaining_quantity as stock 
+        FROM coupon as c
+        join coupon_quantity as cq on c.id = cq.coupon_id
+        WHERE DATE(c.start_at) = ${upcomingDate}
+        AND cq.remaining_quantity > 0;
+      `;
+
+        return upcomingCouponList;
+    }
 }

@@ -3,34 +3,37 @@ import { UserController } from './user.controller';
 import { UserService } from '../domain/user.service';
 import { USER_REPOSITORY } from '../domain/user.repository';
 import { UserPrismaRepository } from '../infrastructure/user.prisma.repository';
-import { PrismaService } from '../../database/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { createMockUser } from '../../../prisma/seed/user.seed';
 import { RedisModule } from '../../database/redis/redis.module';
-import { RedisService } from '../../database/redis/redis.service';
+import { RedlockService } from '../../database/redis/redlock.service';
+import { PrismaModule } from '../../database/prisma/prisma.module';
+
+import { TRANSACTION_MANAGER } from '../../common/transaction/transaction-client';
+import { PrismaTransactionManager } from '../../common/transaction/prisma.transaction-client';
 
 describe('UserController', () => {
     let controller: UserController;
-    let redisService: RedisService;
+    let redlockService: RedlockService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            imports: [RedisModule],
+            imports: [RedisModule, PrismaModule],
             controllers: [UserController],
             providers: [
-                PrismaService,
                 ConfigService,
                 UserService,
                 { provide: USER_REPOSITORY, useClass: UserPrismaRepository },
+                { provide: TRANSACTION_MANAGER, useClass: PrismaTransactionManager },
             ],
         }).compile();
 
         controller = module.get<UserController>(UserController);
-        redisService = module.get<RedisService>(RedisService);
+        redlockService = module.get<RedlockService>(RedlockService);
     });
 
     afterEach(async () => {
-        await redisService.quit();
+        await redlockService.quit();
     });
 
     it('사용자에 대한 충전이 정상 작동한다.', async () => {

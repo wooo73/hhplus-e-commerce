@@ -6,12 +6,17 @@ import { CouponPrismaRepository } from './infrastructure/coupon.prisma.repositor
 import { TRANSACTION_MANAGER } from '../common/transaction/transaction-client';
 import { PrismaTransactionManager } from '../common/transaction/prisma.transaction-client';
 import { RedisModule } from '../database/redis/redis.module';
+import { CouponScheduler } from './presentation/coupon.schedule';
+import { CouponRedisRepository } from './infrastructure/coupon.redis.repository';
+import { LoggerModule } from '../common/logger/logger.module';
 
 @Module({
-    imports: [RedisModule],
+    imports: [RedisModule, LoggerModule],
     controllers: [CouponController],
     providers: [
         CouponService,
+        CouponScheduler,
+        CouponRedisRepository,
         {
             provide: COUPON_REPOSITORY,
             useClass: CouponPrismaRepository,
@@ -21,6 +26,10 @@ import { RedisModule } from '../database/redis/redis.module';
             useClass: PrismaTransactionManager,
         },
     ],
-    exports: [CouponService, { provide: COUPON_REPOSITORY, useClass: CouponPrismaRepository }],
+    exports: [
+        CouponService,
+        { provide: COUPON_REPOSITORY, useClass: CouponPrismaRepository },
+        CouponRedisRepository,
+    ],
 })
 export class CouponModule {}

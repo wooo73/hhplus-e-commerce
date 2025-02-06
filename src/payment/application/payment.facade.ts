@@ -6,7 +6,7 @@ import {
     TRANSACTION_MANAGER,
     TransactionManager,
 } from '../../common/transaction/transaction-client';
-import { RedisService } from '../../database/redis/redis.service';
+import { RedlockService } from '../../database/redis/redlock.service';
 
 import { PaymentRequestDto } from '../presentation/dto/payment.request.dto';
 
@@ -15,7 +15,7 @@ export class PaymentFacade {
     constructor(
         private readonly orderService: OrderService,
         private readonly userService: UserService,
-        private readonly redisService: RedisService,
+        private readonly redlockService: RedlockService,
         @Inject(TRANSACTION_MANAGER) private readonly transactionManager: TransactionManager,
     ) {}
     async payment(dto: PaymentRequestDto) {
@@ -48,10 +48,10 @@ export class PaymentFacade {
             const retryCount = 0;
             const retryDelay = 0;
 
-            await this.redisService.setRedLock(retryCount, retryDelay);
+            await this.redlockService.setRedLock(retryCount, retryDelay);
 
             const key = `payment:${orderId}`;
-            lock = await this.redisService.acquireLock(key, lockDuration);
+            lock = await this.redlockService.acquireLock(key, lockDuration);
 
             return await this.transactionManager.transaction(async (tx) => {
                 //주문 조회
@@ -71,7 +71,7 @@ export class PaymentFacade {
         } catch (err) {
             throw err;
         } finally {
-            await this.redisService.releaseLock(lock);
+            await this.redlockService.releaseLock(lock);
         }
     }
 }

@@ -10,14 +10,20 @@ import { UserService } from '../../user/domain/user.service';
 import { ProductService } from '../../product/domain/product.service';
 import { CouponService } from '../../coupon/domain/coupon.service';
 
-import { PrismaService } from '../../database/prisma/prisma.service';
 import { TRANSACTION_MANAGER } from '../../common/transaction/transaction-client';
 import { OrderRequestDto } from '../presentation/dto/order.request.dto';
+import { PrismaModule } from '../../database/prisma/prisma.module';
+import { OrderModule } from '../order.module';
+import { UserModule } from '../../user/user.module';
+import { CouponModule } from '../../coupon/coupon.module';
+import { ProductModule } from '../../product/product.module';
+import { RedisModule } from '../../database/redis/redis.module';
 
 jest.mock('../domain/order.service');
 jest.mock('../../user/domain/user.service');
 jest.mock('../../product/domain/product.service');
 jest.mock('../../coupon/domain/coupon.service');
+jest.mock('../../database/redis/redlock.service');
 
 describe('OrderFacade', () => {
     let orderFacade: OrderFacade;
@@ -28,14 +34,16 @@ describe('OrderFacade', () => {
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
+            imports: [
+                RedisModule,
+                PrismaModule,
+                OrderModule,
+                UserModule,
+                CouponModule,
+                ProductModule,
+            ],
             providers: [
                 ConfigService,
-                PrismaService,
-                OrderFacade,
-                OrderService,
-                UserService,
-                CouponService,
-                ProductService,
                 {
                     provide: TRANSACTION_MANAGER,
                     useValue: { transaction: jest.fn((cb) => cb()) },
@@ -62,8 +70,8 @@ describe('OrderFacade', () => {
         const dto = plainToInstance(OrderRequestDto, { userId, couponId, products });
 
         const availableProduct = [
-            { price: 1000, productId: 1, quantity: 1 },
-            { price: 2000, productId: 2, quantity: 2 },
+            { id: 1, price: 1000, productId: 1, quantity: 1 },
+            { id: 2, price: 2000, productId: 2, quantity: 2 },
         ];
         productService.getAvailableOrderProducts.mockResolvedValue(availableProduct);
 
