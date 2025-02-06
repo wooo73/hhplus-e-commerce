@@ -44,7 +44,7 @@ export class CouponRedisRepository {
         return await this.redis.sadd(key, member);
     }
 
-    async sismemberCouponIssue(key: string, member: string): Promise<number> {
+    async sismemberIssueCoupon(key: string, member: string): Promise<number> {
         return await this.redis.sismember(key, member);
     }
 
@@ -56,7 +56,7 @@ export class CouponRedisRepository {
         return await this.redis.zcard(key);
     }
 
-    async IssueCouponQueueCnt(key: string) {
+    async issueCouponQueueCnt(key: string) {
         return await this.redis.scard(key);
     }
 

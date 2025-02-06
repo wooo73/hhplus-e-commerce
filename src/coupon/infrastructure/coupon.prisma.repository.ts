@@ -233,7 +233,6 @@ export class CouponPrismaRepository implements CouponRepository {
     async getUpcomingCouponList(
         upcomingDate: string,
     ): Promise<{ couponId: number; stock: number }[] | []> {
-        console.log({ upcomingDate });
         const client = this.getClient();
 
         const upcomingCouponList = await client.$queryRaw<

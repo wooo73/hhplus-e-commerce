@@ -136,7 +136,7 @@ export class CouponService {
         const member = String(userId);
 
         //지급 이력 중복 체크
-        const isDuplicate = await this.couponRedisRepository.sismemberCouponIssue(issueKey, member);
+        const isDuplicate = await this.couponRedisRepository.sismemberIssueCoupon(issueKey, member);
         if (isDuplicate) {
             throw new BadRequestException(ErrorMessage.COUPON_ISSUE_DUPLICATED);
         }

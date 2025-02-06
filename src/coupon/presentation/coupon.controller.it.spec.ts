@@ -203,7 +203,7 @@ describe('CouponController', () => {
 
             const requestQueueCnt =
                 await couponRedisRepository.issueCouponRequestQueueCnt(requestKey);
-            const issueQueueCnt = await couponRedisRepository.IssueCouponQueueCnt(issueKey);
+            const issueQueueCnt = await couponRedisRepository.issueCouponQueueCnt(issueKey);
 
             expect(requestQueueCnt).toEqual(userCount - remainingQuantity);
             expect(issueQueueCnt).toEqual(remainingQuantity);
