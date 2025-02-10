@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { TransactionClient } from '../../common/transaction/transaction-client';
-import { ProductStatus } from '../../common/status';
+import { OrderStatus, ProductStatus } from '../../common/status';
 import { ProductRepository } from '../domain/product.repository';
 import { ProductWithQuantityDomain } from '../domain/product-with-quantity';
 import { ProductQuantityDomain } from '../domain/product-quantity';
@@ -111,11 +111,13 @@ export class ProductPrismaRepository implements ProductRepository {
                  p.price AS price,
                  p.status AS status,
                  SUM(oi.quantity) AS orderQuantity
-            FROM order_item oi
+            FROM \`order\` o 
+            JOIN order_item oi ON o.id = oi.order_id
             JOIN product p ON oi.product_id = p.id
-            WHERE p.status = ${ProductStatus.IN_STOCK}
-            AND oi.created_at >= ${startDate}
-            AND oi.created_at <= ${endDate}
+            WHERE o.status = ${OrderStatus.PAID}
+            AND p.status = ${ProductStatus.IN_STOCK}
+            AND o.created_at >= ${startDate}
+            AND o.created_at <= ${endDate}
             GROUP BY oi.product_id 
             ORDER BY SUM(oi.quantity)
             DESC LIMIT 5
