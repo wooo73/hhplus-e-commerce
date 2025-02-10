@@ -5,19 +5,34 @@ import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export const getCurrentDate = () => {
-    const currentDate = dayjs().tz('Asia/Seoul').startOf('day').format('YYYY-MM-DD');
+export const getCurrentDate = (format: string = 'YYYY-MM-DD') => {
+    const currentDate = dayjs().tz('Asia/Seoul').startOf('day').format(format);
     return currentDate;
 };
 
-export const getPastDate = (day: number) => {
+export const getPastDate = (day: number, format: string = 'YYYY-MM-DD') => {
     const currentDate = getCurrentDate();
-    const pastDate = dayjs(currentDate).subtract(day, 'day').startOf('day').format('YYYY-MM-DD');
+    const pastDate = dayjs(currentDate).subtract(day, 'day').startOf('day').format(format);
     return pastDate;
 };
 
-export const getUpcomingDate = (day: number) => {
+export const getUpcomingDate = (day: number, format: string = 'YYYY-MM-DD') => {
     const currentDate = getCurrentDate();
-    const futureDate = dayjs(currentDate).add(day, 'day').startOf('day').format('YYYY-MM-DD');
+    const futureDate = dayjs(currentDate).add(day, 'day').startOf('day').format(format);
     return futureDate;
+};
+
+export const getCustomAddDateTime = (
+    day: number,
+    hour: number = 0,
+    minute: number = 0,
+    format: string = 'YYYY-MM-DD HH:mm:ss',
+) => {
+    const currentDate = getCurrentDate();
+    return dayjs(currentDate)
+        .add(day, 'day')
+        .startOf('day')
+        .set('hour', hour)
+        .set('minute', minute)
+        .format(format);
 };
