@@ -22,6 +22,9 @@ export class ProductPrismaRepository implements ProductRepository {
         const client = this.getClient(tx);
 
         const products = await client.product.findMany({
+            where: {
+                status: ProductStatus.IN_STOCK,
+            },
             include: {
                 productQuantity: {
                     select: { quantity: true, remainingQuantity: true },
@@ -110,7 +113,8 @@ export class ProductPrismaRepository implements ProductRepository {
                  SUM(oi.quantity) AS orderQuantity
             FROM order_item oi
             JOIN product p ON oi.product_id = p.id
-            WHERE oi.created_at >= ${startDate}
+            WHERE p.status = ${ProductStatus.IN_STOCK}
+            AND oi.created_at >= ${startDate}
             AND oi.created_at <= ${endDate}
             GROUP BY oi.product_id 
             ORDER BY SUM(oi.quantity)
