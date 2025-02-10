@@ -4,13 +4,13 @@ import { UserChargePointRequestDto } from '../presentation/dto/user.request.dto'
 import { UserDomain } from './user';
 import { TransactionClient } from '../../common/transaction/transaction-client';
 import { ErrorMessage } from '../../common/errorStatus';
-import { RedisService } from '../../database/redis/redis.service';
+import { RedlockService } from '../../database/redis/redlock.service';
 
 @Injectable()
 export class UserService {
     constructor(
         @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
-        private readonly redisService: RedisService,
+        private readonly redisService: RedlockService,
     ) {}
 
     async getUserBalance(userId: number, tx?: TransactionClient): Promise<UserDomain> {

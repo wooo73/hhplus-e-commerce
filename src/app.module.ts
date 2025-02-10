@@ -8,16 +8,20 @@ import { PrismaModule } from './database/prisma/prisma.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { LoggerModule } from './common/logger/logger.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { RedisModule } from './database/redis/redis.module';
 
 @Module({
     imports: [
         LoggerModule,
         PrismaModule,
+        RedisModule,
         UserModule,
         ProductModule,
         OrderModule,
         CouponModule,
         PaymentModule,
+        ScheduleModule.forRoot(),
     ],
     controllers: [],
     providers: [

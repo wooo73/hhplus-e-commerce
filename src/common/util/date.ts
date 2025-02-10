@@ -15,3 +15,9 @@ export const getPastDate = (day: number) => {
     const pastDate = dayjs(currentDate).subtract(day, 'day').startOf('day').format('YYYY-MM-DD');
     return pastDate;
 };
+
+export const getUpcomingDate = (day: number) => {
+    const currentDate = getCurrentDate();
+    const futureDate = dayjs(currentDate).add(day, 'day').startOf('day').format('YYYY-MM-DD');
+    return futureDate;
+};
