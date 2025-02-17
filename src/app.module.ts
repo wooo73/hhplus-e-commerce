@@ -10,6 +10,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { LoggerModule } from './common/logger/logger.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RedisModule } from './database/redis/redis.module';
+import { AlimTalkModule } from './alim-talk/alim-talk.module';
 
 @Module({
     imports: [
@@ -22,6 +23,7 @@ import { RedisModule } from './database/redis/redis.module';
         CouponModule,
         PaymentModule,
         ScheduleModule.forRoot(),
+        AlimTalkModule,
     ],
     controllers: [],
     providers: [
