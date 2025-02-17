@@ -1,9 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../src/database/prisma/prisma.service';
 import { getCustomAddDateTime } from '../../src/common/util/date';
-import fs from 'fs';
-import path from 'path';
-import { OrderStatus } from '../../src/common/status';
 
 const configService = new ConfigService();
 const prisma = new PrismaService(configService);
@@ -100,92 +97,8 @@ async function createOrderMockData() {
     });
 }
 
-async function createOrderMockDataCsv() {
-    const users = await prisma.user.findMany();
-    const products = await prisma.product.findMany();
-
-    const orders = [];
-    const orderItems = [];
-
-    const dateList = ['2025-02-07 13:40:00', '2025-02-09 14:20:00', '2025-02-10 15:00:00'];
-    const quantityList = [1, 2, 3];
-    const orderStatusList = [OrderStatus.PENDING, OrderStatus.PAID];
-
-    const { id: lastOrderId } = await prisma.order.findFirst({
-        orderBy: {
-            id: 'desc',
-        },
-        select: {
-            id: true,
-        },
-    });
-
-    // 10개의 주문 데이터 생성
-    for (let i = 0; i < 500000; i++) {
-        const userId = users[0].id;
-        const { id: productId, price } = products[Math.floor(Math.random() * products.length)];
-        const quantity = Math.floor(Math.random() * 3) + 1; // 1~3개 랜덤 수량
-        const totalAmount = price * quantity;
-        const date = dateList[Math.floor(Math.random() * dateList.length)];
-
-        const orderId = lastOrderId + (i + 1);
-
-        // order 데이터
-        orders.push({
-            id: orderId,
-            user_id: userId,
-            coupon_id: 0,
-            total_amount: totalAmount,
-            discount_amount: 0,
-            final_amount: totalAmount,
-            status: orderStatusList[Math.floor(Math.random() * orderStatusList.length)],
-            created_at: date,
-            updated_at: date,
-        });
-
-        // orderItem 데이터
-        orderItems.push({
-            order_id: orderId,
-            product_id: productId,
-            quantity: quantityList[Math.floor(Math.random() * quantityList.length)],
-            price,
-            created_at: date,
-            updated_at: date,
-        });
-    }
-
-    // Order CSV 파일 생성
-    const orderCsvHeader =
-        'id,user_id,coupon_id,total_amount,discount_amount,final_amount,status,created_at,updated_at\n';
-    const orderCsvContent = orders
-        .map(
-            (order) =>
-                `${order.id},${order.user_id},${order.coupon_id},${order.total_amount},${order.discount_amount},${order.final_amount},${order.status},${order.created_at},${order.updated_at}`,
-        )
-        .join('\n');
-
-    // OrderItem CSV 파일 생성
-    const orderItemCsvHeader = 'id,order_id,product_id,quantity,price,created_at,updated_at\n';
-    const orderItemCsvContent = orderItems
-        .map(
-            (item) =>
-                `${item.order_id},${item.order_id},${item.product_id},${item.quantity},${item.price},${item.created_at},${item.updated_at}`,
-        )
-        .join('\n');
-
-    // 파일 저장
-    fs.writeFileSync(path.join(__dirname, 'orders_bulk.csv'), orderCsvHeader + orderCsvContent);
-    fs.writeFileSync(
-        path.join(__dirname, 'order_items_bulk.csv'),
-        orderItemCsvHeader + orderItemCsvContent,
-    );
-
-    console.log('주문 데이터 CSV 파일이 생성되었습니다.');
-}
-
 (async () => {
     await initTable();
-    // await createOrderMockDataCsv();
     // await createProductMockData();
     // await createUserMockData();
     // await createCouponMockData();
