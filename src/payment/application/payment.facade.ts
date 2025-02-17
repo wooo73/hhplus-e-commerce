@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { UserService } from '../../user/domain/user.service';
 import { OrderService } from '../../order/domain/order.service';
 
@@ -9,6 +9,8 @@ import {
 import { RedlockService } from '../../database/redis/redlock.service';
 
 import { PaymentRequestDto } from '../presentation/dto/payment.request.dto';
+import { EventBus } from '@nestjs/cqrs';
+import { PaymentSuccessEvent } from '../events/payment-success-event';
 
 @Injectable()
 export class PaymentFacade {
@@ -16,6 +18,7 @@ export class PaymentFacade {
         private readonly orderService: OrderService,
         private readonly userService: UserService,
         private readonly redlockService: RedlockService,
+        private eventBus: EventBus,
         @Inject(TRANSACTION_MANAGER) private readonly transactionManager: TransactionManager,
     ) {}
     async payment(dto: PaymentRequestDto) {
@@ -32,9 +35,12 @@ export class PaymentFacade {
             await this.userService.useUserBalance(userId, user.balance, order.finalAmount, tx);
 
             //주문 상태 변경
-            return await this.orderService.payOrder(orderId, tx);
+            const updatedOrder = await this.orderService.payOrder(orderId, tx);
 
-            //TODO: 외부 플랫폼 전송
+            //알림톡
+            this.eventBus.publish(new PaymentSuccessEvent(updatedOrder));
+
+            return updatedOrder;
         });
     }
 

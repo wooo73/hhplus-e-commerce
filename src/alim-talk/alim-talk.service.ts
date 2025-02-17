@@ -1,16 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { SendMessageDto } from './dto/send.dto';
-import { OrderWithItemDomain } from '../order/domain/order-with-item';
 import { AlimTalkResponse } from '../common/status';
+import { PaymentSuccessEvent } from 'src/payment/events/payment-success-event';
 
 @Injectable()
 export class AlimTalkService {
-    async sendMessage(message: SendMessageDto) {
-        new Promise((resolve) => setTimeout(resolve, 3000));
+    async sendMessage(event: PaymentSuccessEvent) {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
         return AlimTalkResponse.SEND_SUCCESS;
     }
 
-    setMessage(message: OrderWithItemDomain) {
+    setMessage(message: PaymentSuccessEvent) {
         return message;
     }
 }
