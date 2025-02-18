@@ -11,9 +11,27 @@ import { LoggerModule } from './common/logger/logger.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RedisModule } from './database/redis/redis.module';
 import { AlimTalkModule } from './alim-talk/alim-talk.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
     imports: [
+        ClientsModule.register([
+            {
+                name: 'KAFKA_CLIENT',
+                transport: Transport.KAFKA,
+                options: {
+                    client: {
+                        clientId: 'nestjs',
+                        brokers: ['localhost:9092'],
+                    },
+                    consumer: {
+                        groupId: 'helloKafka-client',
+                    },
+                },
+            },
+        ]),
         LoggerModule,
         PrismaModule,
         RedisModule,
@@ -25,12 +43,13 @@ import { AlimTalkModule } from './alim-talk/alim-talk.module';
         ScheduleModule.forRoot(),
         AlimTalkModule,
     ],
-    controllers: [],
+    controllers: [AppController],
     providers: [
         {
             provide: APP_INTERCEPTOR,
             useClass: LoggingInterceptor,
         },
+        AppService,
     ],
 })
 export class AppModule {}
