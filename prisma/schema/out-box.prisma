@@ -1,5 +1,6 @@
 model outBox {
     id         Int       @id @default(autoincrement())
+    messageId  String    @map("message_id") @db.VarChar(100)
     topic      String    @db.VarChar(100)
     message    String    @db.VarChar(100)
     status     String    @db.VarChar(100)
