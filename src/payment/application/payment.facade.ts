@@ -1,4 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventBus } from '@nestjs/cqrs';
+import * as crypto from 'crypto';
+
 import { UserService } from '../../user/domain/user.service';
 import { OrderService } from '../../order/domain/order.service';
 
@@ -9,8 +12,9 @@ import {
 import { RedlockService } from '../../database/redis/redlock.service';
 
 import { PaymentRequestDto } from '../presentation/dto/payment.request.dto';
-import { EventBus } from '@nestjs/cqrs';
 import { PaymentSuccessEvent } from '../events/payment-success-event';
+import { KafkaTopic } from '../../common/kafkaTopic';
+import { KafkaOutboxStatus } from '../../common/status';
 
 @Injectable()
 export class PaymentFacade {
@@ -37,8 +41,15 @@ export class PaymentFacade {
             //주문 상태 변경
             const updatedOrder = await this.orderService.payOrder(orderId, tx);
 
+            const payload = {
+                messageId: crypto.randomUUID(),
+                topic: KafkaTopic.PAYMENT_SUCCESS,
+                message: JSON.stringify(updatedOrder),
+                status: KafkaOutboxStatus.PUBLISH,
+            };
+
             //알림톡
-            this.eventBus.publish(new PaymentSuccessEvent(updatedOrder));
+            this.eventBus.publish(new PaymentSuccessEvent(payload));
 
             return updatedOrder;
         });

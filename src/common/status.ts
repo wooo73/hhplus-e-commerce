@@ -24,3 +24,8 @@ export enum AlimTalkResponse {
     SEND_SUCCESS = '알림톡 발송 완료',
     SEND_FAILED = '알림톡 발송 실패',
 }
+
+export enum KafkaOutboxStatus {
+    PUBLISH = 'PUBLISH',
+    COMPLETE = 'COMPLETE',
+}
