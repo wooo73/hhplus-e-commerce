@@ -1,9 +1,9 @@
 model CouponQuantity {
   id                Int    @id @default(autoincrement())
-  coupon            Coupon @relation(fields: [couponId], references: [id])
   couponId          Int    @unique @map("coupon_id")
   quantity          Int
   remainingQuantity Int    @map("remaining_quantity")
+  coupon            Coupon @relation(fields: [couponId], references: [id])
 
   @@map("coupon_quantity")
 }

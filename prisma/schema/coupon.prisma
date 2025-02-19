@@ -2,7 +2,7 @@ model Coupon {
   id             Int             @id @default(autoincrement())
   name           String          @db.VarChar(50)
   discountType   String          @map("discount_type") @db.VarChar(10)
-  discountValue  Int             @map("discount_value") @db.Int
+  discountValue  Int             @map("discount_value")
   status         String          @default("AVAILABLE")
   startAt        DateTime        @map("start_at") @db.Timestamp(0)
   endAt          DateTime        @map("end_at") @db.Timestamp(0)
