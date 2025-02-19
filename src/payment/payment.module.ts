@@ -12,6 +12,10 @@ import { CouponModule } from '../coupon/coupon.module';
 import { OrderModule } from '../order/order.module';
 import { AlimTalkModule } from '../alim-talk/alim-talk.module';
 import { LoggerModule } from '../common/logger/logger.module';
+import { PaymentConsumer } from './presentation/payment.consumer';
+import { OutboxModule } from '../outbox/outbox.module';
+import { PaymentHandler } from './events/payment.handler';
+import { KafkaModule } from '../kafka/kafka.module';
 
 @Module({
     imports: [
@@ -23,12 +27,15 @@ import { LoggerModule } from '../common/logger/logger.module';
         CouponModule,
         OrderModule,
         AlimTalkModule,
+        OutboxModule,
+        KafkaModule,
     ],
-    controllers: [PaymentController],
+    controllers: [PaymentController, PaymentConsumer],
     providers: [
         PaymentService,
         PaymentFacade,
         { provide: TRANSACTION_MANAGER, useClass: PrismaTransactionManager },
+        PaymentHandler,
     ],
     exports: [PaymentFacade, PaymentService],
 })
