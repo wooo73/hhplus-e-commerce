@@ -1,0 +1,10 @@
+model outBox {
+    id         Int       @id @default(autoincrement())
+    topic      String    @db.VarChar(100)
+    message    String    @db.VarChar(100)
+    status     String    @db.VarChar(100)
+    created_at DateTime  @default(now()) @db.Timestamp(0)
+    updated_at DateTime? @db.Timestamp(0)
+
+    @@map("out_box")
+}
