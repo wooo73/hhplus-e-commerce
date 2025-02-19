@@ -16,6 +16,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { KafkaModule } from './kafka/kafka.module';
+import { OutboxModule } from './outbox/outbox.module';
 
 @Module({
     imports: [
@@ -30,6 +31,7 @@ import { KafkaModule } from './kafka/kafka.module';
         ScheduleModule.forRoot(),
         AlimTalkModule,
         KafkaModule,
+        OutboxModule,
     ],
     controllers: [AppController],
     providers: [
