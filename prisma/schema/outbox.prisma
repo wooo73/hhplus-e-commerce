@@ -1,9 +1,9 @@
 model outbox {
-  id         Int       @id @default(autoincrement())
-  messageId  String    @unique(map: "outbox_un") @map("message_id") @db.VarChar(100)
-  topic      String    @db.VarChar(100)
-  message    String    @db.Text
-  status     String    @db.VarChar(100)
-  created_at DateTime  @default(now()) @db.Timestamp(0)
-  updated_at DateTime? @db.Timestamp(0)
+  id        Int       @id @default(autoincrement())
+  messageId String    @unique(map: "outbox_un") @map("message_id") @db.VarChar(100)
+  topic     String    @db.VarChar(100)
+  message   String    @db.Text
+  status    String    @db.VarChar(100)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamp(0)
 }
