@@ -15,28 +15,10 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { KafkaModule } from './kafka/kafka.module';
 
 @Module({
     imports: [
-        ClientsModule.registerAsync([
-            {
-                name: 'KAFKA_CLIENT',
-                imports: [ConfigModule],
-                useFactory: (configService: ConfigService) => ({
-                    transport: Transport.KAFKA,
-                    options: {
-                        client: {
-                            clientId: configService.get('KAFKA_CLIENT_ID'),
-                            brokers: [configService.get('KAFKA_BROKER')],
-                        },
-                        consumer: {
-                            groupId: configService.get('KAFKA_CLIENT_GROUP_ID'),
-                        },
-                    },
-                }),
-                inject: [ConfigService],
-            },
-        ]),
         LoggerModule,
         PrismaModule,
         RedisModule,
@@ -47,6 +29,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         PaymentModule,
         ScheduleModule.forRoot(),
         AlimTalkModule,
+        KafkaModule,
     ],
     controllers: [AppController],
     providers: [
