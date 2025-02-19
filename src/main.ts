@@ -5,19 +5,22 @@ import { PrismaService } from './database/prisma/prisma.service';
 import { ValidationPipe } from '@nestjs/common';
 import { GlobalExceptionFilter } from './common/exception/exception';
 import { Transport } from '@nestjs/microservices';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
+
+    const config = app.get(ConfigService);
 
     app.connectMicroservice({
         transport: Transport.KAFKA,
         options: {
             client: {
-                clientId: 'kafkaClient',
-                brokers: ['localhost:9092'],
+                clientId: config.get('KAFKA_CLIENT_ID'),
+                brokers: [config.get('KAFKA_BROKER')],
             },
             consumer: {
-                groupId: 'helloKafka-server',
+                groupId: config.get('KAFKA_SERVER_GROUP_ID'),
             },
         },
     });

@@ -14,22 +14,27 @@ import { AlimTalkModule } from './alim-talk/alim-talk.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
     imports: [
-        ClientsModule.register([
+        ClientsModule.registerAsync([
             {
                 name: 'KAFKA_CLIENT',
-                transport: Transport.KAFKA,
-                options: {
-                    client: {
-                        clientId: 'nestjs',
-                        brokers: ['localhost:9092'],
+                imports: [ConfigModule],
+                useFactory: (configService: ConfigService) => ({
+                    transport: Transport.KAFKA,
+                    options: {
+                        client: {
+                            clientId: configService.get('KAFKA_CLIENT_ID'),
+                            brokers: [configService.get('KAFKA_BROKER')],
+                        },
+                        consumer: {
+                            groupId: configService.get('KAFKA_CLIENT_GROUP_ID'),
+                        },
                     },
-                    consumer: {
-                        groupId: 'helloKafka-client',
-                    },
-                },
+                }),
+                inject: [ConfigService],
             },
         ]),
         LoggerModule,
