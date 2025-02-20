@@ -1,20 +1,18 @@
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
-import { Inject } from '@nestjs/common';
-import { ClientKafka } from '@nestjs/microservices';
 
 import { LoggerService } from '../../common/logger/logger.service';
 import { OutboxService } from '../../outbox/outbox.service';
 
 import { PaymentSuccessEvent } from '../../payment/events/payment-success-event';
 import { KafkaTopic } from '../../common/kafkaTopic';
+import { KafkaService } from '../../kafka/kafka.service';
 
 @EventsHandler(PaymentSuccessEvent)
 export class PaymentHandler implements IEventHandler<PaymentSuccessEvent> {
     constructor(
         private readonly loggerService: LoggerService,
         private outboxService: OutboxService,
-        @Inject('KAFKA_CLIENT')
-        private readonly kafkaClient: ClientKafka,
+        private kafkaService: KafkaService,
     ) {}
 
     async handle(event: PaymentSuccessEvent) {
@@ -23,7 +21,7 @@ export class PaymentHandler implements IEventHandler<PaymentSuccessEvent> {
             await this.outboxService.createOutbox(event.payload);
 
             //카프카 메세지 발행
-            this.kafkaClient.emit(KafkaTopic.PAYMENT_SUCCESS, JSON.stringify(event));
+            this.kafkaService.publish(KafkaTopic.PAYMENT_SUCCESS, event.payload);
         } catch (err) {
             this.loggerService.error(err);
         }
