@@ -1,8 +1,6 @@
 model Order {
   id             Int         @id @default(autoincrement())
-  user           User        @relation(fields: [userId], references: [id])
   userId         Int         @map("user_id")
-  userCoupon     UserCoupon? @relation(fields: [couponId], references: [id])
   couponId       Int?        @map("coupon_id")
   totalAmount    Int         @map("total_amount")
   discountAmount Int         @map("discount_amount")
@@ -10,7 +8,10 @@ model Order {
   status         String      @db.VarChar(10)
   createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt      DateTime    @updatedAt @map("updated_at") @db.Timestamp(0)
+  user           User        @relation(fields: [userId], references: [id])
+  userCoupon     UserCoupon? @relation(fields: [couponId], references: [id])
   orderItem      OrderItem[]
 
+  @@index([status, createdAt], map: "order_status_IDX")
   @@map("order")
 }
