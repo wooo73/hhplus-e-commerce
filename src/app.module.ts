@@ -11,6 +11,11 @@ import { LoggerModule } from './common/logger/logger.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RedisModule } from './database/redis/redis.module';
 import { AlimTalkModule } from './alim-talk/alim-talk.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { KafkaModule } from './kafka/kafka.module';
 
 @Module({
     imports: [
@@ -24,13 +29,15 @@ import { AlimTalkModule } from './alim-talk/alim-talk.module';
         PaymentModule,
         ScheduleModule.forRoot(),
         AlimTalkModule,
+        KafkaModule,
     ],
-    controllers: [],
+    controllers: [AppController],
     providers: [
         {
             provide: APP_INTERCEPTOR,
             useClass: LoggingInterceptor,
         },
+        AppService,
     ],
 })
 export class AppModule {}
