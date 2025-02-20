@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { outbox } from '@prisma/client';
+import { KafkaOutboxStatus } from 'src/common/status';
 import { TransactionClient } from 'src/common/transaction/transaction-client';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 
@@ -39,5 +40,11 @@ export class OutboxRepository {
         const client = this.getClient(tx);
 
         return await client.outbox.update({ where: { messageId }, data: { status } });
+    }
+
+    async findUncommitOutbox(tx?: TransactionClient): Promise<outbox[]> {
+        const client = this.getClient(tx);
+
+        return await client.outbox.findMany({ where: { status: KafkaOutboxStatus.PUBLISH } });
     }
 }
