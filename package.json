@@ -20,8 +20,8 @@
         "test:e2e": "jest --config ./test/jest-e2e.json",
         "test:it": "jest --config ./test/it/it.jest.json",
         "test:container": "npm run docker:up && wait-on tcp:3307 && npm run migrate:test && npm run seed:test && npm run test user.service.spec.ts && npm run docker:down",
-        "docker:up": "docker-compose -f docker-compose.yaml up -d",
-        "docker:down": "docker-compose -f docker-compose.yaml down -v",
+        "docker:up": "docker compose -p e-commerce -f ./docker/kafka-compose.yaml -f ./docker/redis-compose.yaml up -d",
+        "docker:down": "docker compose -p e-commerce -f ./docker/kafka-compose.yaml -f ./docker/redis-compose.yaml down",
         "migrate:test": "dotenv -e .env.test -- npx prisma migrate deploy",
         "seed:test": "npx prisma db seed"
     },
